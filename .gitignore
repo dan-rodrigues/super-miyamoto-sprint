@@ -1,0 +1,43 @@
+.DS_Store
+
+# GCC
+
+/prog.elf
+/prog.bin
+/prog.hex
+
+/sections_p.lds
+
+/**/*.d
+/**/*.o
+
+# Generated sources
+
+/*_tiles.h
+/*_tiles.c
+/*_tiles.bin
+/*_palette.h
+/*_palette.c
+/*_palette.bin
+/test.png
+
+/*.opus
+/*.webm
+
+# Optional disassembly
+
+/dasm
+
+# Utilities
+
+/test.png
+/scripts/
+/converter/
+
+# Makefile
+
+/*_log
+/MUSIC
+/ASSERT_ENABLED
+/DEBUG_PRINT
+

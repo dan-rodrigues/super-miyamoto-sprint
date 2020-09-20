@@ -1,0 +1,3 @@
+[submodule "icestation-32"]
+	path = icestation-32
+	url = https://github.com/dan-rodrigues/icestation-32

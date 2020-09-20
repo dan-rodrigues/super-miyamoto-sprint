@@ -1,0 +1,8 @@
+/graphics/*.bin
+/**/*.adpcm
+/**/*.h
+/**/*.c
+
+/audio/mid_left.wav
+/audio/mid_right.wav
+
