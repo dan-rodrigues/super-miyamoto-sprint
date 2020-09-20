@@ -4,6 +4,8 @@ This is a simple retro-inspired platformer game (implemented in C11) targetting 
 
 It's mostly incomplete and what is available here is a playable "sandbox".
 
+(TODO: screenshot later)
+
 ## Prerequisites
 
 * GNU RISC-V toolchain for cross compilation
@@ -57,10 +59,18 @@ To build and run on a given FPGA board:
 make ulx3s_prog
 ```
 
+```
+make MUSIC=1 ulx3s_prog
+```
+
+The default ULX3S programmer used is fujprog which can be a bit slow for large files. If the built with `MUSIC=1` then it might take a minute or two.
 #### iCEBreaker
 
 ```
 make icebreaker_prog
+```
+```
+make MUSIC=1 icebreaker_prog
 ```
 
 ## Controls
