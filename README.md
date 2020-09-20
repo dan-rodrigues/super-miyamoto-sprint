@@ -4,7 +4,7 @@ This is a simple retro-inspired platformer game (implemented in C11) targetting 
 
 It's mostly incomplete and what is available here is a playable "sandbox".
 
-(TODO: screenshot later)
+![Photo](photo/demo.jpg)
 
 ## Prerequisites
 
