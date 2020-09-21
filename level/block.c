@@ -9,19 +9,27 @@
 #include "vram_address.h"
 #include "camera.h"
 #include "vdp.h"
+#include "assert.h"
 
 #include "debug_print.h"
 
 // Stride is configurable but it must be within this total limit
 #define LEVEL_BLOCKS_MAX 8192
 
+static const uint16_t BLOCK_ID_CLEAR = 0x025;
+
 static uint16_t current_stride;
+// Temporarily fixing height
+static const uint16_t current_height = 0x1e0 / 0x10;
+
 static uint16_t current_level[LEVEL_BLOCKS_MAX];
 
 static uint32_t index_at(uint32_t x, uint32_t y);
+static bool in_bounds(uint32_t x, uint32_t y);
 
 void block_load_level(const uint16_t *data, uint16_t stride) {
     current_stride = stride;
+//  current_height = (from level attributes..)
 
     for (uint32_t i = 0; i < LEVEL_BLOCKS_MAX; i++) {
         current_level[i] = data[i];
@@ -29,6 +37,10 @@ void block_load_level(const uint16_t *data, uint16_t stride) {
 }
 
 uint16_t block_lookup(uint32_t x, uint32_t y) {
+    if (!in_bounds(x, y)) {
+        return BLOCK_ID_CLEAR;
+    }
+
     return current_level[index_at(x, y)];
 }
 
@@ -37,15 +49,16 @@ uint16_t block_lookup_pixel(uint32_t x, uint32_t y) {
 }
 
 void erase_block(uint32_t x, uint32_t y, const Camera *camera) {
-    // Fix pixel coordinates to 8x8 block coordinatess
+    // Fix pixel coordinates to 16x16 block coordinatess
     x &= ~0xf;
     y &= ~0xf;
     x /= 0x10;
     y /= 0x10;
 
+    assert(in_bounds(x, y));
+
     // 1. Erase the block in the level data
-    const uint16_t clear_block = 0x025;
-    current_level[index_at(x, y)] = clear_block;
+    current_level[index_at(x, y)] = BLOCK_ID_CLEAR;
 
     // 2. Erase the block from screen *if* it happens to be in view
     // This should be permissive since there's a lot of buffer space offscreen
@@ -61,7 +74,7 @@ void erase_block(uint32_t x, uint32_t y, const Camera *camera) {
 
     // Note the words for clear block could just be set as constants here...
     // This is slower but more flexible incase the block def does actually change
-    uint32_t index = clear_block * 4;
+    uint32_t index = BLOCK_ID_CLEAR * 4;
 
     vcq_add_2x2_map(vram_address(SCROLL_MAP_BASE, x * 2, y * 2),
                     block_map_table[index + 0],
@@ -79,7 +92,7 @@ typedef struct {
 // This makes it easy to add and modify things as progress is made
 
 static const BlockInteractionAttributeTuple block_interaction_attribute_map[] = {
-    {.block = 0x025, .attributes = BLOCK_EMPTY},
+    {.block = BLOCK_ID_CLEAR, .attributes = BLOCK_EMPTY},
 
     // Foreground
     {.block = 0x100, .attributes = BLOCK_CAN_STAND},
@@ -135,4 +148,8 @@ BlockInteractionAttributes block_get_attributes(uint16_t block) {
 
 static uint32_t index_at(uint32_t x, uint32_t y) {
     return sys_multiply(y, current_stride) + x;
+}
+
+static bool in_bounds(uint32_t x, uint32_t y) {
+    return (y < current_height) && (x < current_stride);
 }

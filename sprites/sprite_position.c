@@ -13,7 +13,11 @@
 
 const int32_t Q_1 = 0x10000;
 
-static bool onscreen(int32_t screen_x, int32_t screen_y, int16_t padding_x, int32_t padding_y);
+static bool onscreen(int32_t screen_x,
+                     int32_t screen_y,
+                     int32_t padding_x,
+                     int32_t padding_top,
+                     int32_t padding_bottom);
 
 void sa_apply_velocity(const SpriteVelocity *velocity, SpritePosition *position) {
     position->x_full += velocity->x;
@@ -114,12 +118,15 @@ void sa_apply_horizontal_block_interaction_updates(SpriteActor *actor,
 
 bool sa_within_live_bounds(const SpritePosition *position, const Camera *camera) {
     const int32_t live_bounds = 64;
-    const int32_t padding_y = 16;
+    // Allowed distance off bottom of screen
+    const int32_t padding_bottom = 16;
+    // Allowed distance off top of screen (i.e. item that is kicked up)
+    const int32_t padding_top = 300;
 
     int32_t x = position->x - camera->scroll.x;
     int32_t y = position->y - camera->scroll.y;
 
-    return onscreen(x, y, live_bounds, padding_y);
+    return onscreen(x, y, live_bounds, padding_top, padding_bottom);
 }
 
 // (light variant needed at some point)
@@ -242,10 +249,15 @@ void sa_apply_offset(const SpriteOffset *offset, SpritePosition *position) {
     position->y += offset->y;
 }
 
-static bool onscreen(int32_t screen_x, int32_t screen_y, int16_t padding_x, int32_t padding_y) {
+static bool onscreen(int32_t screen_x,
+                     int32_t screen_y,
+                     int32_t padding_x,
+                     int32_t padding_top,
+                     int32_t padding_bottom)
+{
     return
         (screen_x + padding_x >= 0) &&
         (screen_x - padding_x < SCREEN_ACTIVE_WIDTH) &&
-        (screen_y + padding_y >= 0) &&
-        (screen_y - padding_y < SCREEN_ACTIVE_HEIGHT);
+        (screen_y + padding_top >= 0) &&
+        (screen_y - padding_bottom < SCREEN_ACTIVE_HEIGHT);
 }
