@@ -76,3 +76,7 @@ make MUSIC=1 icebreaker_prog
 ## Controls
 
 The game can be controlled with (limited) buttons on the FPGA board or with certain USB gamepads. Top level verilog modules for each board show which options are available if any. The simulator uses SDL keyboard input for control.
+
+## Acknowledgements
+
+Open game art was used for the graphics and audio with some minor alterations. A full list of attributions to the artists is in the [ATTRIBUTIONS.md](assets/ATTRIBUTIONS.md) file.
