@@ -33,6 +33,11 @@ void draw_hero_sprites(Hero *hero, int16_t sprite_tile, Camera *camera) {
         { .x = 0, .y = -16 }
     };
 
+    static const HeroTileOffset driving_offsets[] = {
+        { .x = 4, .y = -2 },
+        { .x = 4, .y = -18 }
+    };
+
     static const HeroTileOffset carry_offsets[] = {
         { .x = 1, .y = 0 },
         { .x = 0, .y = -16 }
@@ -50,6 +55,8 @@ void draw_hero_sprites(Hero *hero, int16_t sprite_tile, Camera *camera) {
         {CARRY0, 2, 0, {0x04c, 0x0e0, -1}, carry_offsets, {0, -1}},
         {CARRY1, 2, 0, {0x04e, 0x0e0, -1}, carry_offsets},
         {CARRY2, 2, 0, {0x060, 0x0e0, -1}, carry_offsets, {0, 0}},
+
+        {DRIVING, 6, 0, {0x004, 0x0e0, -1}, driving_offsets, {0, 0}},
 
         {KICK, 2, 0, {0x062, 0x0e0, 0x2c6}, kick_frame_offsets, {0, 0}},
 
@@ -109,6 +116,8 @@ void draw_hero_sprites(Hero *hero, int16_t sprite_tile, Camera *camera) {
 
     int32_t tile_x = sprite_x;
 
+    bool priority_drawing = hero_has_draw_priority(hero);
+
     for (uint32_t i = 0; i < HERO_FRAME_MAX_TILES; i++) {
         int16_t frame_tile = sprite_frame->tiles[i];
         if (frame_tile == HERO_FRAME_TILES_END) {
@@ -136,7 +145,11 @@ void draw_hero_sprites(Hero *hero, int16_t sprite_tile, Camera *camera) {
         // Queue 16x16 block of graphics to upload..
         vcq_add_16x16(SPRITE_TILE_BASE, sprite_tile, frame_tile, miyamoto_tiles);
         // ..and point a sprite tile to this block
-        sb_write_priority(x_block, y_block, g_block);
+        if (priority_drawing) {
+            sb_write_priority(x_block, y_block, g_block);
+        } else {
+            sb_write(x_block, y_block, g_block);
+        }
 
         sprite_tile += 2;
     }

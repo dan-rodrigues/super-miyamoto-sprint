@@ -31,6 +31,8 @@
 
 #include "audio_command_queue.h"
 
+#include "global_timers.h"
+
 static void step_frame(Hero *hero, Camera *camera);
 
 GameLoopAction gl_run_frame(GameContext *context) {
@@ -62,6 +64,9 @@ GameLoopAction gl_run_frame(GameContext *context) {
         step_frame(hero, camera);
     }
 
+    // Simple "CPU meter" which just prints the value of the raster counter
+    st_write_hex(VDP_CURRENT_RASTER_Y, 320, 50);
+
     // Finished entire frame worth of processing
     vdp_wait_frame_ended();
 
@@ -87,10 +92,10 @@ static void step_frame(Hero *hero, Camera *camera) {
         .hero = hero
     };
 
-    // Run rideable sprites before anything else (including Hero)
+    // 1. Run rideable sprites before anything else (including Hero)
     sa_run_rideable(&sprite_draw_context);
 
-    // Camera follows hero so update hero first, then track with camera
+    // 2. Camera follows hero so update hero first, then track with camera
     hero_update_state(hero, camera);
     camera_update(camera, hero);
 
@@ -105,8 +110,10 @@ static void step_frame(Hero *hero, Camera *camera) {
     hero_draw_life_meter(hero);
     draw_hero_sprites(hero, 0, camera);
 
-    // Non-rideable sprites run last as hero's position isn't influenced by them
+    // 3. Non-rideable sprites run after hero as hero's position isn't influenced by them
     sa_run_non_rideable(&sprite_draw_context);
+
+    // 4. Light sprite actors run last and they cannot alter the position of regular sprite actors
     sa_run_light(&sprite_draw_context);
 
     // VRAM animation queueing (auto-animated blocks such as muncher plants and lava)
@@ -114,4 +121,6 @@ static void step_frame(Hero *hero, Camera *camera) {
 
     dbg_print_sandbox_instructions();
     dbg_print_status(TEXT_PALETTE_ID, hero, camera);
+
+    gt_tick();
 }

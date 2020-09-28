@@ -9,4 +9,6 @@ typedef struct HeroFrameLayout HeroFrameLayout;
 typedef struct HeroSpriteCarryContext HeroSpriteCarryContext;
 typedef enum HeroSpriteCarryUpdateResult HeroSpriteCarryUpdateResult;
 
+typedef struct HeroVehicleControl HeroVehicleControl;
+
 #endif /* hero_types_h */

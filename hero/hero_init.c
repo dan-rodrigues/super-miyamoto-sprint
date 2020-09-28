@@ -3,22 +3,15 @@
 #include "hero.h"
 
 void hero_level_init(Hero *hero, const LevelAttributes *attributes) {
-    SpritePosition hero_position = {
-        .x = attributes->start_position.x,
-        .y = attributes->start_position.y,
-        .x_fraction = 0,
-        .y_fraction = 0
-    };
-
-    Hero hero_initialized = {
-        .life = HERO_DEFAULT_LIFE,
+    static const Hero hero_initialized = {
+        .life = 0,
         .coins = 0,
         .invulnerability_counter = 0,
 
-        .pad = PAD_INPUT_DECODED_NO_INPUT,
-        .pad_edge = PAD_INPUT_DECODED_NO_INPUT,
+        .pad = {},
+        .pad_edge = {},
         
-        .frame = HERO_IDLE_FRAME,
+        .frame = RUN0,
         .frame_counter = 0,
         .visible = true,
 
@@ -27,12 +20,16 @@ void hero_level_init(Hero *hero, const LevelAttributes *attributes) {
         .against_solid_block = false,
         .animation_counter = 0,
         .direction = RIGHT,
-        .position = hero_position,
-        .velocity = {0, 0},
+        .position = {},
+        .velocity = { 0, 0 },
         .ducking = false,
-        .ridden_sprite_handle = SA_HANDLE_FREE,
+        .platform_sprite_handle = {},
+
+        .vehicle_sprite_handle = {},
+        .pending_vehicle_entry = false,
+
         .kick_timer = 0,
-        .carried_sprite_handle = SA_HANDLE_FREE,
+        .carried_sprite_handle = {},
 
         .climbing = false,
         .moved_while_climbing = false,
@@ -46,4 +43,18 @@ void hero_level_init(Hero *hero, const LevelAttributes *attributes) {
     };
 
     *hero = hero_initialized;
+
+    SpritePosition hero_position = {
+        .x = attributes->start_position.x,
+        .y = attributes->start_position.y,
+        .x_fraction = 0,
+        .y_fraction = 0
+    };
+    hero->position = hero_position;
+
+    hero->life = HERO_DEFAULT_LIFE;
+    hero->frame = HERO_IDLE_FRAME;
+    hero->platform_sprite_handle = SA_HANDLE_FREE;
+    hero->vehicle_sprite_handle = SA_HANDLE_FREE;
+    hero->carried_sprite_handle = SA_HANDLE_FREE;
 }

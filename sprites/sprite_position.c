@@ -19,6 +19,10 @@ static bool onscreen(int32_t screen_x,
                      int32_t padding_top,
                      int32_t padding_bottom);
 
+SpriteDirection sa_direction_flipped(SpriteDirection direction) {
+    return (direction == LEFT ? RIGHT : LEFT);
+}
+
 void sa_apply_velocity(const SpriteVelocity *velocity, SpritePosition *position) {
     position->x_full += velocity->x;
     position->y_full += velocity->y;
@@ -80,13 +84,29 @@ void sa_grounded_update(SpriteActor *actor, int32_t displacement) {
     // (optional extra is a little smoke effect at the base when sliding)
     if (actor->can_be_carried) {
         const int32_t horizontal_decel = Q_1 / 2;
+        sa_horizontal_deceleration(&actor->velocity, horizontal_decel);
+    }
+}
 
-        int32_t decel = (actor->velocity.x > 0) ? horizontal_decel : -horizontal_decel;
-        actor->velocity.x -= decel;
+void sa_horizontal_deceleration(SpriteVelocity *velocity, int32_t decel) {
+    if (!velocity->x) {
+        return;
+    }
 
-        if (SIGN(decel) != SIGN(actor->velocity.x)) {
-            actor->velocity.x = 0;
-        }
+    int32_t directional_decel = (velocity->x > 0) ? decel : -decel;
+    velocity->x -= directional_decel;
+
+    if (SIGN(directional_decel) != SIGN(velocity->x)) {
+        velocity->x = 0;
+    }
+}
+
+void sa_horizontal_acceleration(SpriteVelocity *velocity, SpriteDirection direction, int32_t accel, int32_t max_speed) {
+    int32_t directional_accel = sa_velocity_from_speed(accel, direction);
+    velocity->x += directional_accel;
+
+    if (ABS(velocity->x) >= max_speed) {
+        velocity->x = sa_velocity_from_speed(max_speed, direction);
     }
 }
 
@@ -129,7 +149,6 @@ bool sa_within_live_bounds(const SpritePosition *position, const Camera *camera)
     return onscreen(x, y, live_bounds, padding_top, padding_bottom);
 }
 
-// (light variant needed at some point)
 bool sa_remove_if_outside_bounds(SpriteActor *actor, const Camera *camera) {
     bool in_bounds = sa_within_live_bounds(&actor->position, camera);
 
@@ -182,10 +201,10 @@ void sa_bounding_box_abs(const SpritePosition *position,
                          const SpriteBoundingBox *box,
                          SpriteBoundingBoxAbs *abs)
 {
-    abs->top = position->y + box->offset_y;
-    abs->bottom = position->y + box->offset_y + box->height;
-    abs->left = position->x + box->offset_x;
-    abs->right = position->x + box->offset_x + box->width;
+    abs->top = position->y + box->offset.y;
+    abs->bottom = position->y + box->offset.y + box->size.height;
+    abs->left = position->x + box->offset.x;
+    abs->right = position->x + box->offset.x + box->size.width;
 }
 
 void sa_bounding_box_overlap(const SpriteBoundingBoxAbs *a1,
@@ -218,7 +237,7 @@ bool sa_platform_ride_check(SpriteActor *platform,
     // The faster sprites can fall onto platform, the higher this needs to be..
     // ..or else sprites will just fall through the platform
     const int16_t floor_padding = 7;
-    int16_t platform_height = platform->bounding_box.height;
+    int16_t platform_height = platform->bounding_box.size.height;
     should_ride &= ((position->y + platform_height) - platform->position.y - floor_padding) < 0;
 
     if (should_ride) {
@@ -260,4 +279,8 @@ static bool onscreen(int32_t screen_x,
         (screen_x - padding_x < SCREEN_ACTIVE_WIDTH) &&
         (screen_y + padding_top >= 0) &&
         (screen_y - padding_bottom < SCREEN_ACTIVE_HEIGHT);
+}
+
+int32_t sa_velocity_from_speed(int32_t speed, SpriteDirection direction) {
+    return (direction == LEFT ? -speed : speed);
 }

@@ -85,9 +85,9 @@ void sprite_level_data_load_new(const Camera *camera, const Hero *hero) {
 
     bool moved_left = scroll_last_update.x > camera->scroll.x;
 
-    const int32_t left_bound_margin = 32;
-    int32_t left_bound = camera->scroll.x - left_bound_margin;
-    int32_t right_bound = camera->scroll.x + SCREEN_ACTIVE_WIDTH;
+    const int32_t horizontal_margin = 40;
+    int32_t left_bound = camera->scroll.x - horizontal_margin;
+    int32_t right_bound = camera->scroll.x + SCREEN_ACTIVE_WIDTH + horizontal_margin;
 
     if (moved_left) {
         // Moving towards left
@@ -169,7 +169,8 @@ typedef enum {
     SPRITE_ID_BALL_CURLED = 0xda,
     SPRITE_ID_BALL = 0xdb,
     SPRITE_ID_PLATFORM_X = 0x5b,
-    SPRITE_ID_PLATFORM_Y = 0xc4
+    SPRITE_ID_PLATFORM_Y = 0xc4,
+    SPRITE_ID_TANK = 0x1c
 } SpriteID;
 
 static SpriteActor *sprite_factory(const SpriteLevelEncoded *sprite, const SpritePosition *position) {
@@ -186,6 +187,8 @@ static SpriteActor *sprite_factory(const SpriteLevelEncoded *sprite, const Sprit
             return platform_sprite_init(position, PLATFORM_MOTION_AUTO_X);
         case SPRITE_ID_PLATFORM_Y:
             return platform_sprite_init(position, PLATFORM_MOTION_AUTO_Y);
+        case SPRITE_ID_TANK:
+            return tank_sprite_init(position, true);
         case SPRITE_ID_LAYERED: default:
             return layered_enemy_sprite_init(position);
     }

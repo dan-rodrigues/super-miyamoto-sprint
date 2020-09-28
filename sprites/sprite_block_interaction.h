@@ -29,4 +29,6 @@ bool sa_inside_block_horizontal(const SpritePosition *position,
 
 bool sa_block_ground_test(const SpritePosition *position, const SpriteVelocity *velocity, const SpriteBoundingBox *box, SpriteBlockInteractionResult *result);
 
+bool sa_point_inside_solid_block(const SpritePosition *position);
+
 #endif /* sprite_block_interaction_h */

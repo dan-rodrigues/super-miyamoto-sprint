@@ -9,13 +9,10 @@
 static SpriteDeferredDrawTask deferred_draw_tasks[DEFERRED_DRAW_TASK_MAX];
 static uint32_t deferred_draw_index;
 
-static const uint8_t SA_UNDEFINED = UINT8_MAX;
-
-const SpriteActorHandle SA_HANDLE_FREE = {.index = SA_UNDEFINED, .generation = 0};
-const SpriteActorLightHandle SA_LIGHT_HANDLE_FREE = {.index = SA_UNDEFINED, .generation = 0};
-
 static SpriteActor actors[SPRITE_ACTOR_MAX];
 static SpriteActorLight actors_light[SPRITE_ACTOR_LIGHT_MAX];
+
+static SpriteActor *sa_alloc_impl(uint32_t base_index);
 
 void sa_reset() {
     for (uint32_t i = 0; i < SPRITE_ACTOR_MAX; i++) {
@@ -49,6 +46,7 @@ void sa_init(SpriteActor *actor, SpriteActorMain main) {
     actor->touch_hurts_hero = true;
     actor->stompable = true;
     actor->thud_sound_upon_hitting_wall = false;
+    actor->immune_to_missiles = false;
 
     actor->position.x_full = 0;
     actor->position.y_full = 0;
@@ -62,7 +60,19 @@ void sa_init(SpriteActor *actor, SpriteActorMain main) {
 
 // It is up to the caller to do any followup initialization for a specific actor
 SpriteActor *sa_alloc() {
-    for (uint32_t i = 0; i < SPRITE_ACTOR_MAX; i++) {
+    SpriteActor *actor = sa_alloc_impl(0);
+    assert(actor);
+    return actor;
+}
+
+SpriteActor *sa_alloc_after(SpriteActorHandle handle) {
+    SpriteActor *actor = sa_alloc_impl(handle.index);
+    assert(actor);
+    return actor;
+}
+
+static SpriteActor *sa_alloc_impl(uint32_t base_index) {
+    for (uint32_t i = base_index; i < SPRITE_ACTOR_MAX; i++) {
         SpriteActor *actor = &actors[i];
         if (!sa_live(actor)) {
             actor->handle.index = i;
@@ -70,7 +80,7 @@ SpriteActor *sa_alloc() {
         }
     }
 
-    fatal_error("Couldn't allocate sprite actor");
+    return NULL;
 }
 
 static void sa_run(const SpriteEnvironment *env, bool rideable_only) {
@@ -188,6 +198,7 @@ void sa_init_light(SpriteActorLight *actor, SpriteActorLightMain main) {
     actor->interacts_with_sprites = true;
     actor->falls_off_when_killed = true;
     actor->kills_other_sprites = false;
+    actor->hurts_hero = false;
 
     actor->position.x_full = 0;
     actor->position.y_full = 0;
@@ -235,6 +246,17 @@ bool sa_handle_live_light(SpriteActorLightHandle handle) {
 }
 
 void sa_run_light(const SpriteEnvironment *env) {
+    // Precompute absolute bounding boxes of regular sprites as they shouldn't change due to light actors
+    // Regular sprites can't benefit from this since they can change each others positions unlike light actors
+    for (uint32_t i = 0; i < SPRITE_ACTOR_MAX; i++) {
+        SpriteActor *actor = &actors[i];
+        if (!sa_live(actor)) {
+            continue;
+        }
+
+        sa_bounding_box_abs(&actor->position, &actor->bounding_box, &actor->bounding_box_abs);
+    }
+
     for (uint32_t i = 0; i < SPRITE_ACTOR_LIGHT_MAX; i++) {
         SpriteActorLight *actor = &actors_light[i];
         if (!sa_live_light(actor)) {
@@ -246,5 +268,21 @@ void sa_run_light(const SpriteEnvironment *env) {
         }
 
         actor->main(actor, env);
+    }
+}
+
+// Vehicle (could have separate file for this, pretty specific)
+
+// Not going to spend any extra struct fields for this dynamic dispatch
+// Just using the main function pointer as the "class" ID as they're unique anyway
+
+void sa_hero_vehicle_update(SpriteActor *vehicle, Hero *hero, SpriteVehicleHeroContext *hero_context) {
+    const uintptr_t tank = (uintptr_t)tank_sprite_main;
+    uintptr_t vehicle_main = (uintptr_t)vehicle->main;
+
+    if (vehicle_main == tank) {
+        tank_sprite_hero_drive_update(vehicle, hero, hero_context);
+    } else {
+        fatal_error("This actor isn't a vehicle");
     }
 }

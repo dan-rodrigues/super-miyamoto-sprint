@@ -4,6 +4,12 @@
 
 static bool horizontal_block_check(const SpritePosition *position, const SpriteBoundingBox *box, SpriteBlockInteractionResult *result, bool test_left);
 
+bool sa_point_inside_solid_block(const SpritePosition *position) {
+    uint16_t block = block_lookup_pixel(position->x, position->y);
+    BlockInteractionAttributes attributes = block_get_attributes(block);
+    return !!(attributes & BLOCK_SOLID_SIDE);
+}
+
 bool sa_inside_block_horizontal(const SpritePosition *position,
                                 const SpriteBoundingBox *box,
                                 SpriteBlockInteractionResult *left_result,
@@ -24,13 +30,13 @@ bool sa_block_ground_test(const SpritePosition *position, const SpriteVelocity *
     bool rising = velocity->y < 0;
     bool point_in_first_4_rows = (position->y & 0x08) == 0;
 
-    uint32_t lookup_left = position->x + box->offset_x;
+    uint32_t lookup_left = position->x + box->offset.x;
     uint16_t block_left = block_lookup_pixel(lookup_left, position->y);
     BlockInteractionAttributes left_attributes = block_get_attributes(block_left);
     bool grounded = left_attributes & BLOCK_CAN_STAND;
 
     // Don't bother with alternate lookup if it's in same block
-    uint32_t lookup_right = lookup_left + box->width;
+    uint32_t lookup_right = lookup_left + box->size.width;
 
     uint16_t block_right = block_left;
     BlockInteractionAttributes right_attributes = left_attributes;
@@ -60,10 +66,10 @@ bool sa_block_ground_test(const SpritePosition *position, const SpriteVelocity *
 }
 
 bool sa_inside_block_bottom(const SpritePosition *position, const SpriteBoundingBox *box, SpriteBlockInteractionResult *result) {
-    uint32_t lookup_x_left = position->x + box->offset_x;
-    uint32_t lookup_x_right = lookup_x_left + box->width;
+    uint32_t lookup_x_left = position->x + box->offset.x;
+    uint32_t lookup_x_right = lookup_x_left + box->size.width;
 
-    uint32_t lookup_y = position->y + box->offset_y;
+    uint32_t lookup_y = position->y + box->offset.y;
     bool point_in_bottom_half = (lookup_y % 16 >= 8);
 
     uint16_t block_left = block_lookup_pixel(lookup_x_left, lookup_y);
@@ -95,10 +101,10 @@ bool sa_inside_block_bottom(const SpritePosition *position, const SpriteBounding
 }
 
 static bool horizontal_block_check(const SpritePosition *position, const SpriteBoundingBox *box, SpriteBlockInteractionResult *result, bool test_left) {
-    uint32_t lookup_y_top = position->y + box->offset_y;
-    uint32_t lookup_y_bottom = lookup_y_top + box->height;
+    uint32_t lookup_y_top = position->y + box->offset.y;
+    uint32_t lookup_y_bottom = lookup_y_top + box->size.height;
 
-    uint32_t lookup_x = position->x + box->offset_x + (test_left ? box->width : 0);
+    uint32_t lookup_x = position->x + box->offset.x + (test_left ? box->size.width : 0);
 
     uint16_t block_top = block_lookup_pixel(lookup_x, lookup_y_top);
     BlockInteractionAttributes top_attributes = block_get_attributes(block_top);

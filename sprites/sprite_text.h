@@ -5,5 +5,6 @@
 
 void st_write(const char *text, uint32_t x, uint32_t y);
 void st_write_decimal(uint8_t value, uint32_t x, uint32_t y);
+void st_write_hex(uint16_t value, uint32_t x, uint32_t y);
 
 #endif /* sprite_text_h */

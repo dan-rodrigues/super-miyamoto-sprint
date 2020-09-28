@@ -16,3 +16,5 @@
 * [Platformer sound effects](https://opengameart.org/content/platform-small-sound-effect-pack) by RaoulWB
 * [Many retro sound effects](https://opengameart.org/content/retro-game-sounds-volume-2) by jalastram
 * [Background music](https://www.youtube.com/watch?v=AhSqF0mYz-A) by FUSIONROCKER
+* [Missile launch sound effects](https://opengameart.org/content/4-projectile-launches) by Michel Baradari
+* [Rumble explosion sound effect](https://opengameart.org/content/rumbleexplosion) by Michel Baradari

@@ -27,6 +27,9 @@ SpriteHeroCollisionResult sa_hero_standard_collision(SpriteActor *actor, Hero *h
 bool sa_other_sprite_collision(SpriteActor *actor);
 void sa_other_sprite_platform_check(SpriteActor *platform);
 
+bool sa_light_sprite_collision(SpriteActorLight *actor);
+bool sa_hero_standard_collision_light(SpriteActorLight *actor, Hero *hero);
+
 void sa_kill_sprite(SpriteActor *actor);
 
 #endif /* sprite_collision_h */

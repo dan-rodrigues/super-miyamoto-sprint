@@ -17,6 +17,7 @@
 #include "spr00_palette.h"
 #include "spr01_palette.h"
 #include "spr02_palette.h"
+#include "spr04_palette.h"
 
 void palette_init(const LevelAttributes *attributes) {
     // BG palette
@@ -47,6 +48,8 @@ void palette_init(const LevelAttributes *attributes) {
     pb_preload_single_palette(10, spr01_palette);
     // 11: Green enemy
     pb_preload_single_palette(11, spr02_palette);
+    // 12: Tank
+    pb_preload_single_palette(12, spr04_palette);
 
 #ifdef DEBUG_PRINT
     pb_preload_single_color(TEXT_PALETTE_ID * 0x10 + 1, 0xffff);

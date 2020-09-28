@@ -25,12 +25,14 @@ SOURCES = \
 	sprites/sprite_buffer.c \
 	sprites/sprite_position.c \
 	sprites/sprite_actor.c \
+	sprites/sprite_actor_handle.c \
 	sprites/sprite_block_interaction.c \
 	sprites/sprite_collision.c \
 	sprites/sprite_drawing.c \
 	sprites/sprite_loading.c \
 	sprites/sprite_text.c \
 	sprites/actors/smoke_sprite.c \
+	sprites/actors/moving_smoke_sprite.c \
 	sprites/actors/basic_enemy_sprite.c \
 	sprites/actors/impact_sprite.c \
 	sprites/actors/enemy_generator_sprite.c \
@@ -38,11 +40,16 @@ SOURCES = \
 	sprites/actors/platform_sprite.c \
 	sprites/actors/ball_enemy_sprite.c \
 	sprites/actors/glitter_sprite.c \
+	sprites/actors/tank_sprite.c \
+	sprites/actors/tank_driver_sprite.c \
+	sprites/actors/missile_sprite.c \
+	sprites/actors/spark_sprite.c \
 	level/camera.c \
 	level/camera_init.c \
 	level/block.c \
 	level/level_attributes.c \
 	level/level_loading.c \
+	timers/global_timers.c \
 	vram/vram_command_queue.c \
 	vram/vram_level_update.c \
 	vram/vram_layout.c \
@@ -79,6 +86,7 @@ LEVEL_DIR = assets/levels/
 LEVEL_BIN := $(addprefix $(LEVEL_DIR), \
 	level.bin \
 	block_map_table.bin \
+	block_attributes.bin \
 	sprites.bin \
 	)
 LEVEL_SOURCES := $(LEVEL_BIN:%.bin=%.c)
@@ -102,6 +110,7 @@ PNGS := $(addprefix $(GFX_DIR), \
 	spr00.png \
 	spr01.png \
 	spr02.png \
+	spr04.png \
 	spr06_07.png \
 	fg_bg.png \
 	)
@@ -144,6 +153,8 @@ WAV_FILES := $(addprefix $(AUDIO_ASSETS_DIR), \
 	thud.wav \
 	stomp.wav \
 	hurt.wav \
+	launch.wav \
+	explosion.wav \
 	)
 
 WAV_MUSIC_FILES := $(addprefix $(AUDIO_ASSETS_DIR), \
@@ -178,7 +189,7 @@ include $(ICS32_DIR)software/common/core.mk
 $(eval $(call persisted_var,MUSIC))
 $(eval $(call persisted_var,DEBUG_PRINT))
 
-CFLAGS += -Ihero/ -Isprites/ -Isprites/actors/ -Ilevel/ -Ivram/ -Idebug/ -Iaudio/ -Ipalette/ -Iassets/audio/ -Igcc_lib/ -Iassets/graphics/ -Iassets/misc/ -Iassets/levels/ -Iassets/maps/
+CFLAGS += -Ihero/ -Isprites/ -Isprites/actors/ -Ilevel/ -Ivram/ -Idebug/ -Iaudio/ -Ipalette/ -Iassets/audio/ -Igcc_lib/ -Iassets/graphics/ -Iassets/misc/ -Iassets/levels/ -Iassets/maps/ -Itimers/
 
 ifeq ($(MUSIC), 1)
 CFLAGS += -DMUSIC_INCLUDED
@@ -207,7 +218,7 @@ vram/vram_animated_tiles.o: $(GFX_DIR)animated_tiles.h
 level/level_loading.o: $(addprefix $(GFX_DIR), spr00_tiles.h spr01_tiles.h spr02_tiles.h spr06_07_tiles.h fg_bg_tiles.h)
 level/level_loading.o: $(MAPS_DIR)bg_hills_no_clouds.h $(MAPS_DIR)bg_hills_clouds.h
 level/level_attributes.o: $(LEVEL_DIR)level.h $(LEVEL_DIR)sprites.h
-level/block.o: $(LEVEL_DIR)block_map_table.h
+level/block.o: $(LEVEL_DIR)block_map_table.h $(LEVEL_DIR)block_attributes.h
 game_loop.o: $(LEVEL_DIR)block_map_table.h
 
 ifeq ($(MUSIC), 1)
@@ -220,7 +231,7 @@ debug/debug_print.o: DEBUG_PRINT
 palette/palette_init.o: DEBUG_PRINT
 level/level_loading.o: DEBUG_PRINT
 
-audio/sound_effects.o: $(addprefix $(AUDIO_ASSETS_DIR), jump.h coin.h thud.h stomp.h hurt.h)
+audio/sound_effects.o: $(addprefix $(AUDIO_ASSETS_DIR), jump.h coin.h thud.h stomp.h hurt.h launch.h explosion.h)
 
 debug/debug_custom_assert.o: $(ASSERT_ENABLED_FLAG_PATH)
 

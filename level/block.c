@@ -12,6 +12,7 @@
 #include "assert.h"
 
 #include "debug_print.h"
+#include "block_attributes.h"
 
 // Stride is configurable but it must be within this total limit
 #define LEVEL_BLOCKS_MAX 8192
@@ -88,62 +89,8 @@ typedef struct {
     BlockInteractionAttributes attributes;
 } BlockInteractionAttributeTuple;
 
-// To be replaced with a flash based large table instead of this iterative lookup
-// This makes it easy to add and modify things as progress is made
-
-static const BlockInteractionAttributeTuple block_interaction_attribute_map[] = {
-    {.block = BLOCK_ID_CLEAR, .attributes = BLOCK_EMPTY},
-
-    // Foreground
-    {.block = 0x100, .attributes = BLOCK_CAN_STAND},
-    {.block = 0x101, .attributes = BLOCK_CAN_STAND},
-    {.block = 0x103, .attributes = BLOCK_CAN_STAND},
-    {.block = 0x104, .attributes = BLOCK_CAN_STAND},
-    {.block = 0x106, .attributes = BLOCK_CAN_STAND},
-
-    // Foregound - solid
-    {.block = 0x145, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE},
-    {.block = 0x148, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE},
-    {.block = 0x14b, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE},
-    {.block = 0x14c, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE},
-    {.block = 0x1e2, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE},
-
-    // Vertical ledge blocks
-    {.block = 0x145, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE},
-    {.block = 0x1e2, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE},
-
-    // Solid blocks
-    {.block = 0x124, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE},
-
-    // Pillars
-    {.block = 0x107, .attributes = BLOCK_CAN_STAND},
-    {.block = 0x109, .attributes = BLOCK_CAN_STAND},
-    {.block = 0x108, .attributes = BLOCK_CAN_STAND},
-    {.block = 0x10a, .attributes = BLOCK_CAN_STAND},
-
-    // Cement
-    {.block = 0x130, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE},
-    // Brown
-    {.block = 0x132, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE},
-    // Munching plant
-    {.block = 0x12f, .attributes = BLOCK_CAN_STAND | BLOCK_SOLID_BOTTOM | BLOCK_SOLID_SIDE | BLOCK_DAMAGE},
-
-    // Coins
-    {.block = 0x02b, .attributes = BLOCK_COIN},
-
-    {.block = 0x006, .attributes = BLOCK_CLIMB}
-};
-
-static const size_t block_attribute_map_size = sizeof(block_interaction_attribute_map) / sizeof(BlockInteractionAttributeTuple);
-
 BlockInteractionAttributes block_get_attributes(uint16_t block) {
-    for (uint32_t i = 0; i < block_attribute_map_size; i++) {
-        if (block_interaction_attribute_map[i].block == block) {
-            return block_interaction_attribute_map[i].attributes;
-        }
-    }
-
-    return BLOCK_EMPTY;
+    return block_attributes[block];
 }
 
 static uint32_t index_at(uint32_t x, uint32_t y) {

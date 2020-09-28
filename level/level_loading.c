@@ -13,6 +13,7 @@
 #include "audio_command_queue.h"
 #include "debug_print.h"
 #include "vram_animated_tiles.h"
+#include "global_timers.h"
 
 #include "bg_hills_no_clouds.h"
 #include "bg_hills_clouds.h"
@@ -22,6 +23,7 @@
 #include "spr00_tiles.h"
 #include "spr01_tiles.h"
 #include "spr02_tiles.h"
+#include "spr04_tiles.h"
 #include "spr06_07_tiles.h"
 
 void level_load(const LevelAttributes *attributes) {
@@ -38,6 +40,7 @@ void level_load(const LevelAttributes *attributes) {
     vcq_reset();
     pb_reset();
     acq_reset();
+    gt_reset();
 
     // Foregound is a 512x512 map tiled repeatedly
     vdp_set_wide_map_layers(SCROLL0);
@@ -101,6 +104,9 @@ void level_load(const LevelAttributes *attributes) {
     vdp_write_vram_block(spr01_tiles, spr01_tiles_length);
     // 02: Comm sprites 3/4
     vdp_write_vram_block(spr02_tiles, spr02_tiles_length);
+
+    // 04: Tank enemy (skipping due to double size sprite above)
+    vdp_write_vram_block(spr04_tiles, spr04_tiles_length);
 
     // 06-07: 8x16 font
     vdp_seek_vram(SPRITE_TILE_BASE + 0x1800);

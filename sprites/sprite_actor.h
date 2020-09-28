@@ -14,16 +14,14 @@
 #include "platform_sprite.h"
 #include "ball_enemy_sprite.h"
 #include "glitter_sprite.h"
+#include "tank_sprite.h"
+#include "missile_sprite.h"
+#include "tank_driver_sprite.h"
+#include "spark_sprite.h"
+#include "moving_smoke_sprite.h"
 
 #define SPRITE_ACTOR_MAX 32
-#define SPRITE_ACTOR_LIGHT_MAX 32
-
-extern const SpriteActorHandle SA_HANDLE_FREE;
-
-struct SpriteActorHandle {
-    uint8_t index;
-    uint8_t generation;
-};
+#define SPRITE_ACTOR_LIGHT_MAX 48
 
 struct SpriteActor {
     SpriteActorMain main;
@@ -47,6 +45,7 @@ struct SpriteActor {
     bool dies_upon_stomp;
     bool falls_off_when_killed;
     bool kills_other_sprites;
+    bool immune_to_missiles;
 
     bool thud_sound_upon_hitting_wall;
     
@@ -55,8 +54,11 @@ struct SpriteActor {
     // For multiplayer there will be multiple heroes though may be worth keeping this
     bool carried;
 
-    // This is ONLY used for sprite<->sprite collision
+    // Used for sprite<->sprite collision only
     SpriteBoundingBox bounding_box;
+
+    // Used for sprite<->light sprite collision only
+    SpriteBoundingBoxAbs bounding_box_abs;
 
     // Debug
     const char *debug_label;
@@ -68,6 +70,8 @@ struct SpriteActor {
         LayeredEnemy layered_enemy;
         PlatformSprite platform;
         BallEnemy ball_enemy;
+        TankSprite tank;
+        TankDriverSprite tank_driver;
         // ...
     };
 };
@@ -83,6 +87,8 @@ struct SpriteEnvironment {
 void sa_reset(void);
 
 SpriteActor *sa_alloc(void);
+SpriteActor *sa_alloc_after(SpriteActorHandle handle);
+
 void sa_init(SpriteActor *actor, SpriteActorMain main);
 bool sa_level_index_live(int8_t level_index);
 void sa_free(SpriteActor *actor);
@@ -107,12 +113,19 @@ struct SpriteDeferredDrawTask {
 void sa_add_deferred_draw_task(SpriteActor *actor, SpriteDeferredDrawFunction function);
 void sa_run_deferred_draw_tasks(SpriteEnvironment *environment);
 
-// Light actors:
+// Vehicles:
 
-struct SpriteActorLightHandle {
-    uint8_t index;
-    uint8_t generation;
+struct SpriteVehicleHeroContext {
+    SpriteBoundingBox sprite_box;
+
+    SpriteBoundingBox horizontal_block_boxes[2];
+    SpriteBoundingBox vertical_block_boxes[2];
+    uint8_t box_count;
 };
+
+void sa_hero_vehicle_update(SpriteActor *vehicle, Hero *hero, SpriteVehicleHeroContext *hero_context);
+
+// Light actors:
 
 struct SpriteActorLight {
     SpriteActorLightMain main;
@@ -126,6 +139,7 @@ struct SpriteActorLight {
     bool interacts_with_sprites;
     bool falls_off_when_killed;
     bool kills_other_sprites;
+    bool hurts_hero;
 
     // This is ONLY used for sprite<->sprite collision
     SpriteBoundingBox bounding_box;
@@ -133,8 +147,11 @@ struct SpriteActorLight {
     // Sprite definitions
     union {
         SmokeSprite smoke;
+        MovingSmokeSprite moving_smoke;
         ImpactSprite impact;
         GlitterSprite glitter;
+        MissileSprite missile;
+        SparkSprite spark;
         // ...
     };
 };

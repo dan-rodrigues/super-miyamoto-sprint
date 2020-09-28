@@ -40,7 +40,7 @@ void ball_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
             case BALL_ENEMY_WALKING: {
                 const int32_t walk_speed = Q_1 / 2;
 
-                self->velocity.x = (self->direction == RIGHT ? walk_speed : -walk_speed);
+                self->velocity.x = sa_velocity_from_speed(walk_speed, self->direction);
 
                 if (sa_hero_standard_collision(self, env->hero) == SA_HERO_COLLISION_STOMP) {
                     sub->state = BALL_ENEMY_CURLED;
@@ -94,7 +94,7 @@ void ball_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
 
         if (set_rolling_velocity) {
             uint32_t speed = roll_speed + sub->extra_kick_speed;
-            self->velocity.x = self->direction == LEFT ? -speed : speed;
+            self->velocity.x = sa_velocity_from_speed(speed, self->direction);
         }
 
         self->kills_other_sprites = (sub->state == BALL_ENEMY_ROLLING);
@@ -125,15 +125,13 @@ static void move(SpriteActor *self, const Hero *hero) {
     }
 
     static const SpriteBoundingBox horizontal_box = {
-        .offset_x = -6,
-        .offset_y = -8,
-        .width = 14,
-        .height = 4
+        .offset = { -6, -8 },
+        .size = { 14, 4 }
     };
 
     static const SpriteBoundingBox vertical_box = {
-        .offset_x = -4, .offset_y = -16,
-        .width = 4 + 3, .height = 16
+        .offset = { -4, -16 },
+        .size = { 4 + 3, 16 }
     };
 
     sa_apply_velocity_with_gravity(self, &vertical_box);
@@ -213,10 +211,8 @@ SpriteActor *ball_enemy_sprite_init(const SpritePosition *position, bool walking
     actor->can_ride = true;
 
     static const SpriteBoundingBox sprite_box = {
-        .height = 15,
-        .width = 16,
-        .offset_x = -8,
-        .offset_y = -15
+        .offset = { -8, -15 },
+        .size = { 16, 15 }
     };
     actor->bounding_box = sprite_box;
 
