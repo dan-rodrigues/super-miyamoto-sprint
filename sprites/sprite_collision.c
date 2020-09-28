@@ -9,13 +9,16 @@
 static bool has_collision(const SpritePosition *p1, const SpriteBoundingBox *b1,
                           const SpritePosition *p2, const SpriteBoundingBox *b2);
 
-static bool has_collision_abs(const SpriteBoundingBoxAbs *p1,
-                              const SpritePosition *p2, const SpriteBoundingBox *b2);
+static bool has_collision_1_abs(const SpriteBoundingBoxAbs *p1,
+                                const SpritePosition *p2, const SpriteBoundingBox *b2);
+
+static bool has_collision_2_abs(const SpriteBoundingBoxAbs *p1,
+                                const SpriteBoundingBoxAbs *p2);
 
 static void projectile_kill(SpriteActor *actor);
 
 bool sa_has_hero_collision(const SpriteActor *actor, const Hero *hero) {
-    return has_collision_abs(&hero->bounding_box_abs, &actor->position, &actor->bounding_box);
+    return has_collision_1_abs(&hero->bounding_box_abs, &actor->position, &actor->bounding_box);
 }
 
 bool sa_has_collision(const SpriteActor *s1, const SpriteActor *s2) {
@@ -58,8 +61,8 @@ SpriteHeroCollisionResult sa_hero_standard_collision(SpriteActor *actor, Hero *h
 
     // Short sprites can hurt hero without this check
     bool hero_high_enough = true;
-    if (actor->bounding_box.height >= 16) {
-        hero_high_enough = hero->position.y < (actor->position.y - (actor->bounding_box.height / 2));
+    if (actor->bounding_box.size.height >= 16) {
+        hero_high_enough = hero->position.y < (actor->position.y - (actor->bounding_box.size.height / 2));
     }
 
     bool hero_falling = hero->velocity.y > 0;
@@ -109,7 +112,7 @@ void sa_other_sprite_platform_check(SpriteActor *platform) {
         if (!other || !other->can_ride || other->killed) {
             continue;
         }
-        if (!has_collision_abs(&box_abs, &other->position, &other->bounding_box)) {
+        if (!has_collision_1_abs(&box_abs, &other->position, &other->bounding_box)) {
             if (sa_handle_equal(other->ridden_sprite_handle, platform->handle)) {
                 sa_handle_clear(&other->ridden_sprite_handle);
             }
@@ -142,16 +145,13 @@ bool sa_other_sprite_collision(SpriteActor *actor) {
 
     for (uint32_t i = 0; i < SPRITE_ACTOR_MAX; i++) {
         SpriteActor *other = sa_index(i);
-        if (!other) {
-            continue;
-        }
-        if (!other->interacts_with_sprites || other->killed) {
+        if (!other || !other->interacts_with_sprites || other->killed) {
             continue;
         }
         if (actor->handle.index == other->handle.index) {
             continue;
         }
-        if (!has_collision_abs(&box_abs, &other->position, &other->bounding_box)) {
+        if (!has_collision_1_abs(&box_abs, &other->position, &other->bounding_box)) {
             continue;
         }
 
@@ -197,8 +197,8 @@ bool sa_other_sprite_collision(SpriteActor *actor) {
         actor->direction = (actor_goes_left ? LEFT : RIGHT);
         other->direction = (!actor_goes_left ? LEFT : RIGHT);
 
-        bool invert_actor_velocity = actor_goes_left && actor->velocity.x > 0;
-        bool invert_other_velocity = !actor_goes_left && other->velocity.x > 0;
+        bool invert_actor_velocity = (actor_goes_left != (actor->velocity.x < 0));
+        bool invert_other_velocity = (actor_goes_left != (other->velocity.x > 0));
 
         if (invert_actor_velocity) {
             actor->velocity.x = -actor->velocity.x;
@@ -211,28 +211,76 @@ bool sa_other_sprite_collision(SpriteActor *actor) {
     return false;
 }
 
+bool sa_light_sprite_collision(SpriteActorLight *actor) {
+    // Precompute caller's absolute bounding box
+    SpriteBoundingBoxAbs box_abs;
+    sa_bounding_box_abs(&actor->position, &actor->bounding_box, &box_abs);
+
+    for (uint32_t i = 0; i < SPRITE_ACTOR_MAX; i++) {
+        SpriteActor *other = sa_index(i);
+        if (!other || !other->interacts_with_sprites || other->killed) {
+            continue;
+        }
+        if (!has_collision_2_abs(&box_abs, &other->bounding_box_abs)) {
+            continue;
+        }
+        if (other->immune_to_missiles) {
+            continue;
+        }
+
+        projectile_kill(other);
+
+        return true;
+    }
+
+    return false;
+}
+
+bool sa_hero_standard_collision_light(SpriteActorLight *actor, Hero *hero) {
+    if (!actor->hurts_hero) {
+        return false;
+    }
+    if (!has_collision_1_abs(&hero->bounding_box_abs, &actor->position, &actor->bounding_box)) {
+        return false;
+    }
+
+    hero_damage(hero);
+
+    return true;
+}
+
 static bool has_collision(const SpritePosition *p1, const SpriteBoundingBox *b1,
                           const SpritePosition *p2, const SpriteBoundingBox *b2)
 {
     SpriteBoundingBoxAbs p1_abs;
     sa_bounding_box_abs(p1, b1, &p1_abs);
 
-    return has_collision_abs(&p1_abs, p2, b2);
+    return has_collision_1_abs(&p1_abs, p2, b2);
 }
 
-static bool has_collision_abs(const SpriteBoundingBoxAbs *p1,
-                              const SpritePosition *p2, const SpriteBoundingBox *b2)
+static bool has_collision_1_abs(const SpriteBoundingBoxAbs *p1,
+                                const SpritePosition *p2, const SpriteBoundingBox *b2)
 {
-    int32_t s2_top = p2->y + b2->offset_y;
-    int32_t s2_bottom = p2->y + b2->offset_y + b2->height;
-    int32_t s2_left = p2->x + b2->offset_x;
-    int32_t s2_right = p2->x + b2->offset_x + b2->width;
+    int32_t s2_top = p2->y + b2->offset.y;
+    int32_t s2_bottom = p2->y + b2->offset.y + b2->size.height;
+    int32_t s2_left = p2->x + b2->offset.x;
+    int32_t s2_right = p2->x + b2->offset.x + b2->size.width;
 
     return
         p1->left < s2_right &&
         p1->right > s2_left &&
         p1->top < s2_bottom &&
         p1->bottom > s2_top;
+}
+
+static bool has_collision_2_abs(const SpriteBoundingBoxAbs *p1,
+                                const SpriteBoundingBoxAbs *p2)
+{
+    return
+        p1->left < p2->right &&
+        p1->right > p2->left &&
+        p1->top < p2->bottom &&
+        p1->bottom > p2->top;
 }
 
 static void projectile_kill(SpriteActor *actor) {

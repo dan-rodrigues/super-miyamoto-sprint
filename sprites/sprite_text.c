@@ -6,6 +6,8 @@
 #include "sprite_buffer.h"
 
 static void write_char(char c, uint32_t x, uint32_t y);
+static void write_hex_char(uint32_t value, uint32_t x, uint32_t y);
+
 static uint16_t div_mod_10(uint16_t dividend, uint32_t *remainder);
 
 void st_write(const char *text, uint32_t x, uint32_t y) {
@@ -23,6 +25,23 @@ void st_write_decimal(uint8_t value, uint32_t x, uint32_t y) {
     if (tens_digit) {
         write_char('0' + tens_digit, x, y);
     }
+}
+
+void st_write_hex(uint16_t value, uint32_t x, uint32_t y) {
+    write_hex_char(value >> 12 & 0xf, x, y);
+    write_hex_char(value >> 8 & 0xf, x + 8, y);
+    write_hex_char(value >> 4 & 0xf, x + 16, y);
+    write_hex_char(value & 0xf, x + 24, y);
+}
+
+static void write_hex_char(uint32_t value, uint32_t x, uint32_t y) {
+    if (value >= 10) {
+        value += 'A' - 10;
+    } else {
+        value += '0';
+    }
+
+    write_char(value, x, y);
 }
 
 static void write_char(char c, uint32_t x, uint32_t y) {

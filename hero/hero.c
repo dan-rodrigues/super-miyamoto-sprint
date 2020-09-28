@@ -20,12 +20,13 @@ const uint8_t HERO_DEFAULT_LIFE = 3;
 typedef struct {
     bool vine;
     bool hurt;
+    bool grounded;
 } HeroBlockAttributesProcessedContext;
 
 static const HeroFrame HERO_IDLE_CARRYING_FRAME = CARRY2;
 static const HeroFrame HERO_JUMP_CARRYING_FRAME = CARRY0;
 
-static const SpriteBoundingBox *block_bounding_box(const Hero *hero);
+static const SpriteBoundingBox *block_horizontal_bounding_box(const Hero *hero);
 static const SpriteBoundingBox *block_vertical_bounding_box(const Hero *hero);
 
 static void precompute_bounding_box(Hero *hero);
@@ -36,34 +37,19 @@ static void handle_damage(Hero *hero);
 
 static void handle_standard_movement(Hero *hero);
 static void handle_climbing_movement(Hero *hero);
+static void handle_vehicle_movement(Hero *hero);
 
 static void horizontal_block_displacement(Hero *hero, const SpriteBlockInteractionResult *result, bool left);
 
 static void update_from_block_interaction(Hero *hero, const HeroBlockAttributesProcessedContext *context);
 static void perform_extra_block_interaction(Hero *hero, const SpriteBlockInteractionResult *result, HeroBlockAttributesProcessedContext *context, const Camera *camera);
 
-void hero_update_state(Hero *hero, const Camera *camera) {
+static void handle_standard_motion_update(Hero *hero) {
     const PadInputDecoded *pad = &hero->pad;
     const PadInputDecoded *pad_edge = &hero->pad_edge;
 
-    handle_damage(hero);
-    sprite_carry_check(hero);
-
-    HeroBlockAttributesProcessedContext block_context = {
-        .vine = false,
-        .hurt = false
-    };
-
     SpriteVelocity *velocity = &hero->velocity;
     SpritePosition *position = &hero->position;
-
-    // Movement depending on current state
-
-    if (hero->climbing) {
-        handle_climbing_movement(hero);
-    } else {
-        handle_standard_movement(hero);
-    }
 
     // Gravity
 
@@ -74,7 +60,8 @@ void hero_update_state(Hero *hero, const Camera *camera) {
     // Holding button B sustains the jump for longer
 
     if (!hero->climbing && !riding_platform(hero)) {
-        int32_t gravity_delta = (pad->b ? gravity_accel_low : gravity_accel_high);
+        bool sustain_jump = (pad->b || pad->a || pad->l);
+        int32_t gravity_delta = (sustain_jump ? gravity_accel_low : gravity_accel_high);
 
         velocity->y += gravity_delta;
         velocity->y = MIN(velocity->y, fall_speed_max);
@@ -109,12 +96,24 @@ void hero_update_state(Hero *hero, const Camera *camera) {
 
     // ..then apply and offsets from ridden platform if applicable
     if (riding_platform(hero)) {
-        const PlatformSprite *platform = &sa_get(hero->ridden_sprite_handle)->platform;
+        const PlatformSprite *platform = &sa_get(hero->platform_sprite_handle)->platform;
         sa_apply_offset(&platform->frame_offset, &hero->position);
     }
+}
+
+static void iterate_block_interaction(
+                                      Hero *hero,
+                                      const Camera *camera,
+                                      const SpriteBoundingBox *horizontal_box,
+                                      const SpriteBoundingBox *vertical_box,
+                                      HeroBlockAttributesProcessedContext *block_context)
+{
+    SpriteVelocity *velocity = &hero->velocity;
+    SpritePosition *position = &hero->position;
+
+    const PadInputDecoded *pad = &hero->pad;
 
     // Did hero bump up against a solid block?
-    const SpriteBoundingBox *vertical_box = block_vertical_bounding_box(hero);
     SpriteBlockInteractionResult block_result;
     bool head_inside = sa_inside_block_bottom(&hero->position, vertical_box, &block_result);
 
@@ -132,18 +131,20 @@ void hero_update_state(Hero *hero, const Camera *camera) {
     }
 
     // Head block interaction
-    perform_extra_block_interaction(hero, &block_result, &block_context, camera);
+    perform_extra_block_interaction(hero, &block_result, block_context, camera);
 
     // Can be grounded by standing on a level block..
     bool level_grounded = sa_block_ground_test(&hero->position, &hero->velocity, vertical_box, &block_result);
+    block_context->grounded = level_grounded;
+
     // ..or a rideable sprite
     bool sprite_grounded = riding_platform(hero);
 
     bool grounded = level_grounded | sprite_grounded;
-    hero->grounded = grounded;
+    hero->grounded |= grounded;
 
     // Foot block interaction
-    perform_extra_block_interaction(hero, &block_result, &block_context, camera);
+    perform_extra_block_interaction(hero, &block_result, block_context, camera);
 
     if (level_grounded) {
         position->y = position->y & ~15;
@@ -162,13 +163,12 @@ void hero_update_state(Hero *hero, const Camera *camera) {
 
     SpriteBlockInteractionResult left_result, right_result;
     SpriteBlockInteractionResult left_result_padded, right_result_padded;
-    SpriteBoundingBox box = *block_bounding_box(hero);
 
-    SpriteBoundingBox padded_box = box;
-    padded_box.width += 2;
-    padded_box.offset_x -= 1;
+    SpriteBoundingBox padded_box = *horizontal_box;
+    padded_box.size.width += 2;
+    padded_box.offset.x -= 1;
 
-    sa_inside_block_horizontal(&hero->position, &box, &left_result, &right_result);
+    sa_inside_block_horizontal(&hero->position, horizontal_box, &left_result, &right_result);
     sa_inside_block_horizontal(&hero->position, &padded_box, &left_result_padded, &right_result_padded);
 
     // Displace hero horizontally from a block, if needed
@@ -181,11 +181,64 @@ void hero_update_state(Hero *hero, const Camera *camera) {
     bool walking_into_block_from_left = (left_result.solid || left_result_padded.solid) && pad->right;
     bool walking_into_block_from_right = (right_result.solid || right_result_padded.solid || right_result_padded.level_bound_touched) && pad->left;
 
-    hero->against_solid_block = (walking_into_block_from_left || walking_into_block_from_right);
+    hero->against_solid_block |= (walking_into_block_from_left || walking_into_block_from_right);
 
     // Left/right block interaction
-    perform_extra_block_interaction(hero, &left_result, &block_context, camera);
-    perform_extra_block_interaction(hero, &right_result, &block_context, camera);
+    perform_extra_block_interaction(hero, &left_result, block_context, camera);
+    perform_extra_block_interaction(hero, &right_result, block_context, camera);
+}
+
+void hero_update_state(Hero *hero, const Camera *camera) {
+    const PadInputDecoded *pad = &hero->pad;
+
+    handle_damage(hero);
+    sprite_carry_check(hero);
+
+    HeroBlockAttributesProcessedContext block_context = {
+        .vine = false,
+        .hurt = false,
+        .grounded = false
+    };
+
+    // Movement depending on current state
+
+    if (hero_in_any_vehicle(hero)) {
+        handle_vehicle_movement(hero);
+    } else if (hero->climbing) {
+        handle_climbing_movement(hero);
+    } else {
+        handle_standard_movement(hero);
+    }
+
+    handle_standard_motion_update(hero);
+
+    if (hero_in_any_vehicle(hero)) {
+        SpriteActor *vehicle = sa_get(hero->vehicle_sprite_handle);
+        vehicle->position = hero->position;
+    }
+
+    hero->grounded = false;
+    hero->against_solid_block = false;
+
+    // Block interaction using a variable number of bounding boxes:
+
+    uint32_t box_count = 0;
+    const SpriteBoundingBox *horizontal_boxes;
+    const SpriteBoundingBox *vertical_boxes;
+
+    if (hero_in_any_vehicle(hero)) {
+        horizontal_boxes = hero->vehicle_context.horizontal_block_boxes;
+        vertical_boxes = hero->vehicle_context.vertical_block_boxes;
+        box_count = hero->vehicle_context.box_count;
+    } else {
+        horizontal_boxes = block_horizontal_bounding_box(hero);
+        vertical_boxes = block_vertical_bounding_box(hero);
+        box_count = 1;
+    }
+
+    for (uint32_t i = 0; i < box_count; i++) {
+        iterate_block_interaction(hero, camera, &horizontal_boxes[i], &vertical_boxes[i], &block_context);
+    }
 
     // All block processing should be done by now
 
@@ -193,7 +246,7 @@ void hero_update_state(Hero *hero, const Camera *camera) {
 
     // Ducking?
 
-    if (grounded) {
+    if (hero->grounded) {
         hero->ducking = pad->down;
     }
 
@@ -205,11 +258,11 @@ void hero_update_state(Hero *hero, const Camera *camera) {
 
     // Smoke effect when sliding (these should be "secondary" actors at some point)
 
-    if (quick_turn && grounded) {
+    if (quick_turn && hero->grounded) {
         SpritePosition smoke_position = hero->position;
         smoke_position.x -= 1;
         smoke_position.y += 4;
-        smoke_sprite_init(&smoke_position);
+        smoke_sprite_init(&smoke_position, SMOKE_SMALL);
     }
 
     // Invulnerability update
@@ -357,6 +410,25 @@ static void handle_climbing_movement(Hero *hero) {
     hero->sprint_jumping = false;
 }
 
+static void handle_vehicle_movement(Hero *hero) {
+    SpriteActor *vehicle = sa_get(hero->vehicle_sprite_handle);
+
+    if (hero->pending_vehicle_entry) {
+        // Snap hero's position to wherever the vehicle is right now
+        hero->position = vehicle->position;
+        hero->velocity = vehicle->velocity;
+        hero->pending_vehicle_entry = false;
+    }
+
+    // Let vehicle do the updating
+    // possibly pass in control context here to save the effort of doing it again later
+    sa_hero_vehicle_update(vehicle, hero, &hero->vehicle_context);
+
+    if (hero->velocity.x) {
+        hero->direction = (hero->velocity.x < 0 ? LEFT : RIGHT);
+    }
+}
+
 static void update_frame(Hero *hero) {
     bool carrying = sa_handle_live(hero->carried_sprite_handle);
 
@@ -366,7 +438,9 @@ static void update_frame(Hero *hero) {
         show_kick_frame = true;
     }
 
-    if (hero->ducking) {
+    if (hero_in_any_vehicle(hero)) {
+        hero->frame = DRIVING;
+    } else if (hero->ducking) {
         hero->frame = DUCKING;
     } else if (hero->climbing) {
         const int32_t climb_frame_duration = Q_1 * 8;
@@ -490,24 +564,22 @@ static void horizontal_block_displacement(Hero *hero, const SpriteBlockInteracti
 
 const SpriteBoundingBox *hero_sprite_bounding_box(const Hero *hero) {
     static const SpriteBoundingBox hero_box = {
-        .offset_x = -8,
-        .offset_y = -20,
-        .width = 12,
-        .height = 20
+        .offset = { -8, -20},
+        .size = { 12, 20}
     };
 
     return &hero_box;
 }
 
-static const SpriteBoundingBox *block_bounding_box(const Hero *hero) {
+static const SpriteBoundingBox *block_horizontal_bounding_box(const Hero *hero) {
     static const SpriteBoundingBox full_size_box = {
-        .offset_x = -7, .offset_y = -20,
-        .width = 7 + 6, .height = 16
+        .offset = { -7, -20 },
+        .size = { 7 + 6, 16 }
     };
 
     static const SpriteBoundingBox ducking_box = {
-        .offset_x = -7, .offset_y = -8,
-        .width = 7 + 6, .height = 4
+        .offset = { -7, -8 },
+        .size = { 7 + 6, 4 }
     };
 
     if (!hero->ducking) {
@@ -519,13 +591,13 @@ static const SpriteBoundingBox *block_bounding_box(const Hero *hero) {
 
 static const SpriteBoundingBox *block_vertical_bounding_box(const Hero *hero) {
     static const SpriteBoundingBox full_size_box = {
-        .offset_x = -4, .offset_y = -24,
-        .width = 4 + 3, .height = 24
+        .offset = { -4, -24 },
+        .size = {4 + 3, 24 }
     };
 
     static const SpriteBoundingBox ducking_box = {
-        .offset_x = -4, .offset_y = -13,
-        .width = 4 + 3, .height = 13
+        .offset = { -4, -13 },
+        .size = { 4 + 3, 13 }
     };
 
     if (!hero->ducking) {
@@ -643,13 +715,13 @@ HeroSpriteCarryContext hero_sprite_carry_context(const Hero *hero) {
 
 void hero_platform_interaction(Hero *hero, SpriteActor *platform) {
     if (sa_has_hero_collision(platform, hero)) {
-        bool riding = sa_platform_ride_check(platform, &hero->velocity, &hero->position, &hero->ridden_sprite_handle);
+        bool riding = sa_platform_ride_check(platform, &hero->velocity, &hero->position, &hero->platform_sprite_handle);
 
         if (riding) {
             hero->velocity.y = 0;
         }
-    } else if (sa_handle_equal(hero->ridden_sprite_handle, platform->handle)) {
-        sa_platform_dismount(platform, &hero->velocity, &hero->ridden_sprite_handle);
+    } else if (sa_handle_equal(hero->platform_sprite_handle, platform->handle)) {
+        sa_platform_dismount(platform, &hero->velocity, &hero->platform_sprite_handle);
     }
 }
 
@@ -665,18 +737,69 @@ void hero_damage(Hero *hero) {
     }
 }
 
-// (other private functions..)
+// Vehicles:
+
+void hero_enter_vehicle(Hero *hero, SpriteActor *actor) {
+    if (hero_in_vehicle(hero, actor)) {
+        return;
+    }
+
+    hero->vehicle_sprite_handle = actor->handle;
+    hero->pending_vehicle_entry = true;
+}
+
+bool hero_vehicle_control_state(const Hero *hero, HeroVehicleControl *control) {
+    const PadInputDecoded *pad = &hero->pad;
+    const PadInputDecoded *pad_edge = &hero->pad_edge;
+
+    if (pad_edge->a || pad_edge->l) {
+        control->eject = true;
+        return true;
+    }
+
+    control->move_fast = pad->y;
+
+    control->eject = false;
+    control->action = pad_edge->x || pad_edge->r;
+    control->move_left = pad->left;
+    control->move_right = pad->right;
+    control->jump = pad_edge->b && hero->grounded;
+
+    return (control->action || control->move_left || control->move_right);
+}
+
+bool hero_in_vehicle(const Hero *hero, const SpriteActor *actor) {
+    return sa_handle_equal(hero->vehicle_sprite_handle, actor->handle);
+}
+
+bool hero_in_any_vehicle(const Hero *hero) {
+    return sa_handle_live(hero->vehicle_sprite_handle);
+}
+
+// Misc., needs grouping
+
+bool hero_has_draw_priority(const Hero *hero) {
+    // Hero only appears above other sprites if it's "inside" a vehicle
+    return !sa_handle_live(hero->vehicle_sprite_handle);
+}
 
 static void precompute_bounding_box(Hero *hero) {
-    sa_bounding_box_abs(&hero->position, hero_sprite_bounding_box(hero), &hero->bounding_box_abs);
+    const SpriteBoundingBox *box;
+    if (hero_in_any_vehicle(hero)) {
+        box = &hero->vehicle_context.sprite_box;
+    } else {
+        box = hero_sprite_bounding_box(hero);
+    }
+
+    sa_bounding_box_abs(&hero->position, box, &hero->bounding_box_abs);
 }
 
 static bool riding_platform(Hero *hero) {
-    if (sa_handle_live(hero->ridden_sprite_handle)) {
+    if (sa_handle_live(hero->platform_sprite_handle)) {
         return true;
     } else {
         // Platform doesn't exist (anymore)
-        sa_handle_clear(&hero->ridden_sprite_handle);
+        sa_handle_clear(&hero->platform_sprite_handle);
         return false;
     }
 }
@@ -711,7 +834,11 @@ static void perform_extra_block_interaction(Hero *hero, const SpriteBlockInterac
 
 static void update_from_block_interaction(Hero *hero, const HeroBlockAttributesProcessedContext *context) {
     if (context->vine) {
-        if (hero->pad.up && !sa_handle_live(hero->carried_sprite_handle)) {
+        bool should_climb = hero->pad.up;
+        should_climb &= !sa_handle_live(hero->carried_sprite_handle);
+        should_climb &= !hero_in_any_vehicle(hero);
+
+        if (should_climb) {
             hero->climbing = true;
         }
     } else {

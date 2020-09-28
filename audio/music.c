@@ -11,7 +11,7 @@
 
 void music_start() {
 #ifdef MUSIC_INCLUDED
-    const int8_t volume = 0x10;
+    const int8_t volume = 0x0c;
     const uint8_t left_channel = 0;
     const uint8_t right_channel = 1;
     const uint16_t pitch = 0x800;

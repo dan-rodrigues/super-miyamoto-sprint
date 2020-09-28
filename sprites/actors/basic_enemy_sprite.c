@@ -40,15 +40,13 @@ static void move(SpriteActor *self) {
     }
 
     static const SpriteBoundingBox horizontal_box = {
-        .offset_x = -5,
-        .offset_y = -10,
-        .width = 12,
-        .height = 6
+        .offset = { -5, -10 },
+        .size = { 12, 6 }
     };
 
     static const SpriteBoundingBox vertical_box = {
-        .offset_x = -4, .offset_y = -13,
-        .width = 4 + 3, .height = 13
+        .offset = { -4, -13 },
+        .size = { 4 + 3, 13 }
     };
 
     sa_apply_velocity_with_gravity(self, &vertical_box);
@@ -56,7 +54,7 @@ static void move(SpriteActor *self) {
 
     if (!self->killed) {
         const int32_t speed = Q_1 / 2;
-        self->velocity.x = (self->direction == RIGHT ? speed : -speed);
+        self->velocity.x = sa_velocity_from_speed(speed, self->direction);
     } else {
         self->velocity.x = 0;
     }
@@ -104,10 +102,8 @@ SpriteActor *basic_enemy_sprite_init(const SpritePosition *position, bool spiked
     actor->debug_label = spiked ? "(spiked)" : "(regular)";
 
     static const SpriteBoundingBox sprite_box = {
-        .height = 10,
-        .width = 16,
-        .offset_x = -8,
-        .offset_y = -10
+        .offset = { -8, -10 },
+        .size = { 16, 10 }
     };
     actor->bounding_box = sprite_box;
 

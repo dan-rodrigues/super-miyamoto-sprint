@@ -36,14 +36,24 @@ struct SpriteVelocity {
     int32_t x, y;
 };
 
-struct SpriteBoundingBox {
-    int8_t offset_x, offset_y;
+struct SpriteBoundingBoxOffset {
+    int8_t x, y;
+};
+
+struct SpriteBoundingBoxSize {
     int8_t width, height;
+};
+
+struct SpriteBoundingBox {
+    SpriteBoundingBoxOffset offset;
+    SpriteBoundingBoxSize size;
 };
 
 struct SpriteBoundingBoxAbs {
     int32_t top, left, bottom, right;
 };
+
+SpriteDirection sa_direction_flipped(SpriteDirection direction);
 
 void sa_apply_velocity(const SpriteVelocity *velocity, SpritePosition *position);
 void sa_apply_velocity_with_gravity(SpriteActor *actor, const SpriteBoundingBox *box);
@@ -73,5 +83,10 @@ void sa_platform_dismount(const SpriteActor *platform, SpriteVelocity *velocity,
 void sa_apply_offset(const SpriteOffset *offset, SpritePosition *position);
 
 void sa_grounded_update(SpriteActor *actor, int32_t displacement);
+
+void sa_horizontal_acceleration(SpriteVelocity *velocity, SpriteDirection direction, int32_t accel, int32_t max_speed);
+void sa_horizontal_deceleration(SpriteVelocity *velocity, int32_t decel);
+
+int32_t sa_velocity_from_speed(int32_t speed, SpriteDirection direction);
 
 #endif /* sprite_position_h */

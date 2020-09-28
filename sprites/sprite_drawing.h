@@ -24,6 +24,7 @@ struct SpriteDrawParams {
 
 void sa_draw_standard_8x8(const SpriteActor *self, const SpriteEnvironment *env, uint16_t tile, uint8_t palette);
 void sa_draw_standard_8x8_light(const SpriteActorLight *self, const SpriteEnvironment *env, uint16_t tile, uint8_t palette);
+void sa_draw_standard_16x16_light(const SpriteActorLight *self, const SpriteEnvironment *env, uint16_t tile, uint8_t palette);
 
 void sa_draw_standard_16x16(const SpriteActor *self, const SpriteEnvironment *env, uint16_t tile, uint8_t palette);
 

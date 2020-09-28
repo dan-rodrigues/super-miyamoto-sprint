@@ -27,6 +27,8 @@ enum HeroFrame {
 
     KICK,
 
+    DRIVING,
+
     CLIMBING0, CLIMBING1,
     
     RUN_TURNING,
@@ -80,7 +82,11 @@ struct Hero {
     SpriteVelocity velocity;
     SpriteDirection direction;
 
-    SpriteActorHandle ridden_sprite_handle;
+    SpriteActorHandle vehicle_sprite_handle;
+    SpriteVehicleHeroContext vehicle_context;
+    bool pending_vehicle_entry;
+
+    SpriteActorHandle platform_sprite_handle;
 
     SpriteActorHandle carried_sprite_handle;
     uint8_t kick_timer;
@@ -110,6 +116,7 @@ struct HeroFrameLayout {
 void hero_update_state(Hero *hero, const Camera *camera);
 
 const SpriteBoundingBox *hero_sprite_bounding_box(const Hero *hero);
+bool hero_has_draw_priority(const Hero *hero);
 
 // Carried sprites
 
@@ -138,5 +145,20 @@ void hero_platform_interaction(Hero *hero, SpriteActor *platform);
 
 void hero_set_airborne_bounce(Hero *hero);
 void hero_damage(Hero *hero);
+
+// Vehicles
+
+struct HeroVehicleControl {
+    bool move_left, move_right;
+    bool move_fast;
+    bool eject;
+    bool jump;
+    bool action;
+};
+
+void hero_enter_vehicle(Hero *hero, SpriteActor *actor);
+bool hero_in_vehicle(const Hero *hero, const SpriteActor *actor);
+bool hero_in_any_vehicle(const Hero *hero);
+bool hero_vehicle_control_state(const Hero *hero, HeroVehicleControl *control);
 
 #endif /* hero_h */
