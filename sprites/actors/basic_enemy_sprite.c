@@ -22,6 +22,7 @@ void basic_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
     if (self->killed) {
         if (sub->squished && !(--sub->expiry_counter)) {
             sa_free(self);
+            return;
         }
     } else if (sa_hero_standard_collision(self, env->hero) == SA_HERO_COLLISION_STOMP) {
         sub->squished = true;
