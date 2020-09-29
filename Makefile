@@ -155,6 +155,8 @@ WAV_FILES := $(addprefix $(AUDIO_ASSETS_DIR), \
 	hurt.wav \
 	launch.wav \
 	explosion.wav \
+	powerup.wav \
+	dead.wav \
 	)
 
 WAV_MUSIC_FILES := $(addprefix $(AUDIO_ASSETS_DIR), \
@@ -231,7 +233,7 @@ debug/debug_print.o: DEBUG_PRINT
 palette/palette_init.o: DEBUG_PRINT
 level/level_loading.o: DEBUG_PRINT
 
-audio/sound_effects.o: $(addprefix $(AUDIO_ASSETS_DIR), jump.h coin.h thud.h stomp.h hurt.h launch.h explosion.h)
+audio/sound_effects.o: $(WAV_FILES:%.wav=%.o)
 
 debug/debug_custom_assert.o: $(ASSERT_ENABLED_FLAG_PATH)
 

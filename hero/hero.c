@@ -10,12 +10,13 @@
 #include "sprite_block_interaction.h"
 #include "sprite_collision.h"
 #include "debug_print.h"
+#include "hero_life_meter.h"
 
 const HeroFrame HERO_IDLE_FRAME = RUN2;
 
 const uint8_t HERO_SPRINT_CHARGE_TIME = 60;
 const uint8_t HERO_INVULNERABILITY_COUNT = 60 * 2;
-const uint8_t HERO_DEFAULT_LIFE = 3;
+const uint8_t HERO_DEFAULT_LIFE = 4;
 
 typedef struct {
     bool vine;
@@ -39,157 +40,29 @@ static void handle_standard_movement(Hero *hero);
 static void handle_climbing_movement(Hero *hero);
 static void handle_vehicle_movement(Hero *hero);
 
+static void handle_standard_motion_update(Hero *hero);
+
 static void horizontal_block_displacement(Hero *hero, const SpriteBlockInteractionResult *result, bool left);
 
 static void update_from_block_interaction(Hero *hero, const HeroBlockAttributesProcessedContext *context);
 static void perform_extra_block_interaction(Hero *hero, const SpriteBlockInteractionResult *result, HeroBlockAttributesProcessedContext *context, const Camera *camera);
 
-static void handle_standard_motion_update(Hero *hero) {
-    const PadInputDecoded *pad = &hero->pad;
-    const PadInputDecoded *pad_edge = &hero->pad_edge;
-
-    SpriteVelocity *velocity = &hero->velocity;
-    SpritePosition *position = &hero->position;
-
-    // Gravity
-
-    const int32_t gravity_accel_high = Q_1 / 2;
-    const int32_t gravity_accel_low = Q_1 / 6;
-    const int32_t fall_speed_max = 5 * Q_1;
-
-    // Holding button B sustains the jump for longer
-
-    if (!hero->climbing && !riding_platform(hero)) {
-        bool sustain_jump = (pad->b || pad->a || pad->l);
-        int32_t gravity_delta = (sustain_jump ? gravity_accel_low : gravity_accel_high);
-
-        velocity->y += gravity_delta;
-        velocity->y = MIN(velocity->y, fall_speed_max);
-    }
-
-    // Airborne bounce (such as bouncing off an enemy)
-
-    if (hero->airborne_bounce_pending) {
-        const int32_t bounce_initial_speed = 5 * Q_1;
-
-        velocity->y = -bounce_initial_speed;
-        hero->airborne_bounce_pending = false;
-    }
-
-    // Jumping
-
-    if ((hero->grounded || hero->climbing) && pad_edge->b) {
-        const int32_t jump_initial_speed = 5 * Q_1;
-
-        int32_t jump_running_added_speed = ABS(velocity->x) / 8;
-
-        velocity->y = -(jump_initial_speed + jump_running_added_speed);
-        hero->sprint_jumping = (hero->sprinting && !hero->climbing);
-        hero->climbing = false;
-
-        se_jump();
-    }
-
-    // Update hero position according to newly set velocity
-
-    sa_apply_velocity(velocity, position);
-
-    // ..then apply and offsets from ridden platform if applicable
-    if (riding_platform(hero)) {
-        const PlatformSprite *platform = &sa_get(hero->platform_sprite_handle)->platform;
-        sa_apply_offset(&platform->frame_offset, &hero->position);
-    }
-}
-
-static void iterate_block_interaction(
-                                      Hero *hero,
+static void iterate_block_interaction(Hero *hero,
                                       const Camera *camera,
                                       const SpriteBoundingBox *horizontal_box,
                                       const SpriteBoundingBox *vertical_box,
-                                      HeroBlockAttributesProcessedContext *block_context)
-{
-    SpriteVelocity *velocity = &hero->velocity;
-    SpritePosition *position = &hero->position;
+                                      HeroBlockAttributesProcessedContext *block_context);
 
-    const PadInputDecoded *pad = &hero->pad;
-
-    // Did hero bump up against a solid block?
-    SpriteBlockInteractionResult block_result;
-    bool head_inside = sa_inside_block_bottom(&hero->position, vertical_box, &block_result);
-
-    if (head_inside) {
-        // Immediately move hero below the block
-        position->y += block_result.overlap;
-
-        if (velocity->y < 0) {
-            velocity->y = 0;
-        }
-
-        if (!hero->climbing) {
-            se_thud();
-        }
-    }
-
-    // Head block interaction
-    perform_extra_block_interaction(hero, &block_result, block_context, camera);
-
-    // Can be grounded by standing on a level block..
-    bool level_grounded = sa_block_ground_test(&hero->position, &hero->velocity, vertical_box, &block_result);
-    block_context->grounded = level_grounded;
-
-    // ..or a rideable sprite
-    bool sprite_grounded = riding_platform(hero);
-
-    bool grounded = level_grounded | sprite_grounded;
-    hero->grounded |= grounded;
-
-    // Foot block interaction
-    perform_extra_block_interaction(hero, &block_result, block_context, camera);
-
-    if (level_grounded) {
-        position->y = position->y & ~15;
-        position->y_fraction = 0;
-
-        velocity->y = 0;
-        hero->sprint_jumping = false;
-
-        hero->climbing = false;
-    }
-
-    // Is hero horizontally inside a solid block?
-
-    // This must come AFTER the above grounding displacement
-    // Jumping into the corner of a block will otherwise stop the hero abruptly
-
-    SpriteBlockInteractionResult left_result, right_result;
-    SpriteBlockInteractionResult left_result_padded, right_result_padded;
-
-    SpriteBoundingBox padded_box = *horizontal_box;
-    padded_box.size.width += 2;
-    padded_box.offset.x -= 1;
-
-    sa_inside_block_horizontal(&hero->position, horizontal_box, &left_result, &right_result);
-    sa_inside_block_horizontal(&hero->position, &padded_box, &left_result_padded, &right_result_padded);
-
-    // Displace hero horizontally from a block, if needed
-
-    horizontal_block_displacement(hero, &right_result, false);
-    horizontal_block_displacement(hero, &left_result, true);
-
-    // Is hero trying to walk into a solid wall?
-
-    bool walking_into_block_from_left = (left_result.solid || left_result_padded.solid) && pad->right;
-    bool walking_into_block_from_right = (right_result.solid || right_result_padded.solid || right_result_padded.level_bound_touched) && pad->left;
-
-    hero->against_solid_block |= (walking_into_block_from_left || walking_into_block_from_right);
-
-    // Left/right block interaction
-    perform_extra_block_interaction(hero, &left_result, block_context, camera);
-    perform_extra_block_interaction(hero, &right_result, block_context, camera);
-}
+static bool liveness_check(Hero *hero);
+static void draw_death_decoration(const Hero *hero);
 
 void hero_update_state(Hero *hero, const Camera *camera) {
     const PadInputDecoded *pad = &hero->pad;
+
+    if (!liveness_check(hero)) {
+        // Hero can't be controlled by player if dieing
+        return;
+    }
 
     handle_damage(hero);
     sprite_carry_check(hero);
@@ -378,6 +251,63 @@ static void handle_standard_movement(Hero *hero) {
     }
 }
 
+static void handle_standard_motion_update(Hero *hero) {
+    const PadInputDecoded *pad = &hero->pad;
+    const PadInputDecoded *pad_edge = &hero->pad_edge;
+
+    SpriteVelocity *velocity = &hero->velocity;
+    SpritePosition *position = &hero->position;
+
+    // Gravity
+
+    const int32_t gravity_accel_high = Q_1 / 2;
+    const int32_t gravity_accel_low = Q_1 / 6;
+    const int32_t fall_speed_max = 5 * Q_1;
+
+    // Holding button B sustains the jump for longer
+
+    if (!hero->climbing && !riding_platform(hero)) {
+        bool sustain_jump = (pad->b || pad->a || pad->l);
+        int32_t gravity_delta = (sustain_jump ? gravity_accel_low : gravity_accel_high);
+
+        velocity->y += gravity_delta;
+        velocity->y = MIN(velocity->y, fall_speed_max);
+    }
+
+    // Airborne bounce (such as bouncing off an enemy)
+
+    if (hero->airborne_bounce_pending) {
+        const int32_t bounce_initial_speed = 5 * Q_1;
+
+        velocity->y = -bounce_initial_speed;
+        hero->airborne_bounce_pending = false;
+    }
+
+    // Jumping
+
+    if ((hero->grounded || hero->climbing) && pad_edge->b) {
+        const int32_t jump_initial_speed = 5 * Q_1;
+
+        int32_t jump_running_added_speed = ABS(velocity->x) / 8;
+
+        velocity->y = -(jump_initial_speed + jump_running_added_speed);
+        hero->sprint_jumping = (hero->sprinting && !hero->climbing);
+        hero->climbing = false;
+
+        se_jump();
+    }
+
+    // Update hero position according to newly set velocity
+
+    sa_apply_velocity(velocity, position);
+
+    // ..then apply and offsets from ridden platform if applicable
+    if (riding_platform(hero)) {
+        const PlatformSprite *platform = &sa_get(hero->platform_sprite_handle)->platform;
+        sa_apply_offset(&platform->frame_offset, &hero->position);
+    }
+}
+
 static void handle_climbing_movement(Hero *hero) {
     const PadInputDecoded *pad = &hero->pad;
 
@@ -519,9 +449,8 @@ static void handle_damage(Hero *hero) {
         return;
     }
 
-    if (hero->life > 0) {
+    if (--hero->life > 0) {
         // Hero is hurt but not dead
-        hero->life--;
         hero->invulnerability_counter = HERO_INVULNERABILITY_COUNT;
 
         // Hero may need to hop depending on type of damage
@@ -535,8 +464,14 @@ static void handle_damage(Hero *hero) {
             hero->life = HERO_DEFAULT_LIFE;
         }
     } else {
-        // Hero is dead
-        // TODO: handle
+        // Hero is dead (or dieing)
+
+        const uint8_t death_freeze_duration = 30;
+        hero->death_timer = death_freeze_duration;
+        hero->dead = true;
+
+        sa_handle_clear(&hero->carried_sprite_handle);
+        sa_handle_clear(&hero->vehicle_sprite_handle);
     }
 
     hero->damage_pending = false;
@@ -552,7 +487,7 @@ static void horizontal_block_displacement(Hero *hero, const SpriteBlockInteracti
         // Push hero to the right, rather than teleporting
         hero->position.x += (left ? -block_horizontal_ejection_delta : block_horizontal_ejection_delta);
 
-        // Only zero velocity if hero was moving into the block from the left
+        // Only zero velocity if hero was moving into the block
         if ((left ? -hero->velocity.x : hero->velocity.x) < 0) {
             hero->velocity.x = 0;
         }
@@ -629,7 +564,7 @@ void sprite_carry_check(Hero *hero) {
 // otherwise sprite will be positioned on hero 1 frame before hero actually appears to hold it
 
 HeroSpriteCarryUpdateResult hero_sprite_carry_update(Hero *hero, const SpriteActor *actor) {
-    if (!actor->can_be_carried) {
+    if (hero->dead || !actor->can_be_carried) {
         return HERO_SPRITE_CARRY_UPDATE_NOT_CARRYING;
     }
 
@@ -806,7 +741,95 @@ static bool riding_platform(Hero *hero) {
 
 // Block behaviour processing
 
-static void collect_coin(Hero *hero, const SpriteBlockPositionedInteraction *interaction, const Camera *camera);
+static void iterate_block_interaction(Hero *hero,
+                                      const Camera *camera,
+                                      const SpriteBoundingBox *horizontal_box,
+                                      const SpriteBoundingBox *vertical_box,
+                                      HeroBlockAttributesProcessedContext *block_context)
+{
+    SpriteVelocity *velocity = &hero->velocity;
+    SpritePosition *position = &hero->position;
+
+    const PadInputDecoded *pad = &hero->pad;
+
+    // Did hero bump up against a solid block?
+    SpriteBlockInteractionResult block_result;
+    bool head_inside = sa_inside_block_bottom(&hero->position, vertical_box, &block_result);
+
+    if (head_inside) {
+        // Immediately move hero below the block
+        position->y += block_result.overlap;
+
+        if (velocity->y < 0) {
+            velocity->y = 0;
+        }
+
+        if (!hero->climbing) {
+            se_thud();
+        }
+    }
+
+    // Head block interaction
+    perform_extra_block_interaction(hero, &block_result, block_context, camera);
+
+    // Can be grounded by standing on a level block..
+    bool level_grounded = sa_block_ground_test(&hero->position, &hero->velocity, vertical_box, &block_result);
+    block_context->grounded = level_grounded;
+
+    // ..or a rideable sprite
+    bool sprite_grounded = riding_platform(hero);
+
+    bool grounded = level_grounded | sprite_grounded;
+    hero->grounded |= grounded;
+
+    // Foot block interaction
+    perform_extra_block_interaction(hero, &block_result, block_context, camera);
+
+    if (level_grounded) {
+        position->y = position->y & ~15;
+        position->y_fraction = 0;
+
+        velocity->y = 0;
+        hero->sprint_jumping = false;
+
+        hero->climbing = false;
+    }
+
+    // Is hero horizontally inside a solid block?
+
+    // This must come AFTER the above grounding displacement
+    // Jumping into the corner of a block will otherwise stop the hero abruptly
+
+    SpriteBlockInteractionResult left_result, right_result;
+    SpriteBlockInteractionResult left_result_padded, right_result_padded;
+
+    SpriteBoundingBox padded_box = *horizontal_box;
+    padded_box.size.width += 2;
+    padded_box.offset.x -= 1;
+
+    sa_inside_block_horizontal(&hero->position, horizontal_box, &left_result, &right_result);
+    sa_inside_block_horizontal(&hero->position, &padded_box, &left_result_padded, &right_result_padded);
+
+    // Displace hero horizontally from a block, if needed
+
+    horizontal_block_displacement(hero, &right_result, false);
+    horizontal_block_displacement(hero, &left_result, true);
+
+    // Is hero trying to walk into a solid wall?
+
+    bool walking_into_block_from_left = (left_result.solid || left_result_padded.solid) && pad->right;
+    bool walking_into_block_from_right = (right_result.solid || right_result_padded.solid || right_result_padded.level_bound_touched) && pad->left;
+
+    hero->against_solid_block |= (walking_into_block_from_left || walking_into_block_from_right);
+
+    // Left/right block interaction
+    perform_extra_block_interaction(hero, &left_result, block_context, camera);
+    perform_extra_block_interaction(hero, &right_result, block_context, camera);
+}
+
+static void collect_coin(Hero *hero,
+                         const SpriteBlockPositionedInteraction *interaction,
+                         const Camera *camera);
 
 static void perform_extra_block_interaction(Hero *hero, const SpriteBlockInteractionResult *result, HeroBlockAttributesProcessedContext *context, const Camera *camera) {
     // For the two attributes..
@@ -850,9 +873,16 @@ static void update_from_block_interaction(Hero *hero, const HeroBlockAttributesP
     }
 }
 
-static void collect_coin(Hero *hero, const SpriteBlockPositionedInteraction *interaction, const Camera *camera) {
-    // (Eventually adding gameplay effect of collecting coins)
-    hero->coins = MIN(99, hero->coins + 1);
+static void collect_coin(Hero *hero,
+                         const SpriteBlockPositionedInteraction *interaction,
+                         const Camera *camera)
+{
+    const uint8_t coin_limt = 30;
+
+    if (++hero->coins >= coin_limt) {
+        hero_increase_hit_point_max(hero);
+        hero->coins = 0;
+    }
 
     erase_block(interaction->x, interaction->y, camera);
 
@@ -864,4 +894,41 @@ static void collect_coin(Hero *hero, const SpriteBlockPositionedInteraction *int
     glitter_sprite_init(&position);
 
     se_coin();
+}
+
+static void draw_death_decoration(const Hero *hero) {
+    static const SpriteOffset smoke_offsets[] = {
+        { -16, -24 }, { 16, -24 },
+        { 0, -8 },
+        { -16, 8 }, { 16, 8 }
+
+    };
+    static const size_t smoke_offset_count = sizeof(smoke_offsets) / sizeof(SpriteOffset);
+
+    for (uint32_t i = 0; i < smoke_offset_count; i++) {
+        SpritePosition smoke_position = hero->position;
+        sa_apply_offset(&smoke_offsets[i], &smoke_position);
+        smoke_sprite_init(&smoke_position, SMOKE_LARGE);
+    }
+}
+
+static bool liveness_check(Hero *hero) {
+    if (!hero->dead) {
+        return true;
+    }
+
+    bool hero_explodes = false;
+    if (hero->death_timer) {
+        hero_explodes = !(--hero->death_timer);
+    }
+
+    if (hero_explodes) {
+        hero->visible = false;
+
+        draw_death_decoration(hero);
+
+        se_hero_dead();
+    }
+
+    return false;
 }

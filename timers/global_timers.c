@@ -6,6 +6,10 @@ static uint32_t timer_mod_2;
 static uint32_t timer_mod_4;
 static uint32_t timer_mod_8;
 
+uint32_t gt() {
+    return shared_timer;
+}
+
 uint32_t gt_mod_2() {
     return timer_mod_2;
 }

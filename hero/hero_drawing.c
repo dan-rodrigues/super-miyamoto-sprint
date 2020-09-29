@@ -11,7 +11,7 @@
 #include "vram_command_queue.h"
 #include "vram_layout.h"
 
-void draw_hero_sprites(Hero *hero, int16_t sprite_tile, Camera *camera) {
+void hero_draw(Hero *hero, int16_t sprite_tile, Camera *camera) {
     if (!hero->visible) {
         return;
     }

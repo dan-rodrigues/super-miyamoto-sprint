@@ -5,29 +5,42 @@
 #include "vram_command_queue.h"
 #include "animated_tiles.h"
 #include "vram_layout.h"
-
-static uint8_t animation_counter;
+#include "global_timers.h"
 
 static void queue(uint16_t target_tile, uint16_t source_tile_base, uint32_t tile_offset);
+static void queue_animations_impl(bool force);
 
-void vram_queue_animations() {
+void vram_init_animations() {
+    queue_animations_impl(true);
+}
+
+void vram_update_animations() {
+    queue_animations_impl(false);
+}
+
+static void queue_animations_impl(bool force) {
+    uint32_t frame_index = gt();
+    uint32_t frame_index_1 = gt() + 1;
+
     // Munching plants
 
     const uint32_t mucher_tile = 0x5c;
     const uint32_t muncher_source_tile = 0x138;
 
-    bool frame_toggle = (animation_counter / 8) % 2;
-    queue(mucher_tile, muncher_source_tile, (frame_toggle ? 0 : 4));
+    if (!(frame_index % 8) || force) {
+        bool frame_toggle = (frame_index / 8) % 2;
+        queue(mucher_tile, muncher_source_tile, (frame_toggle ? 0 : 4));
+    }
 
     // Coins
 
     const uint32_t coin_tile = 0x6c;
     const uint32_t coin_source_base = 0x0cc;
 
-    uint32_t coin_source_tile = ((animation_counter / 8) % 4) * 0x10;
-    queue(coin_tile, coin_source_base, coin_source_tile);
-
-    animation_counter++;
+    if (!(frame_index_1 % 8) || force) {
+        uint32_t coin_source_tile = ((frame_index_1 / 8) % 4) * 0x10;
+        queue(coin_tile, coin_source_base, coin_source_tile);
+    }
 }
 
 void vram_queue_animated_frame_raw(uint16_t vram_base, uint16_t source_tile_base) {

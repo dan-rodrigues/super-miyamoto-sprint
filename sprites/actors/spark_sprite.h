@@ -7,7 +7,7 @@
 #include "sprite_actor_types.h"
 
 typedef struct {
-    uint8_t life_counter;
+    uint32_t life_counter;
 } SparkSprite;
 
 void spark_sprite_main(SpriteActorLight *self, const SpriteEnvironment *env);

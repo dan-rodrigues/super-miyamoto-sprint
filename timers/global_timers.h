@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+uint32_t gt(void);
 uint32_t gt_mod_2(void);
 uint32_t gt_mod_4(void);
 uint32_t gt_mod_8(void);

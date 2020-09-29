@@ -98,12 +98,10 @@ static void exhaust_decoration(const SpriteActor *self, TankSprite *sub, const H
     if (smoke_acc > 128) {
         smoke_acc -= 128;
 
-        SpritePosition smoke_position = self->position;
         const SpriteOffset smoke_offset = { 20, -18 };
-        const int32_t smoke_flip_offset = -smoke_offset.x * 2;
 
-        sa_apply_offset(&smoke_offset, &smoke_position);
-        smoke_position.x += (self->direction == RIGHT ? smoke_flip_offset : 0);
+        SpritePosition smoke_position = self->position;
+        sa_apply_offset_flip(&smoke_offset, &smoke_position, self->direction);
 
         SpriteActorLight *moving_smoke = moving_smoke_sprite_init(&smoke_position);
         moving_smoke->velocity.x = 0;
@@ -244,7 +242,6 @@ static void missile_launch_update(SpriteActor *self, TankSprite *sub) {
         { -8, -3 }, { -8, -7 }, { -8, 1 }, { -8, -3 }
     };
     static const size_t offset_count = sizeof(launch_offsets) / sizeof(SpriteOffset);
-    const int32_t launch_flip_offset = 18;
 
     // There's a gap between missile launches
 
@@ -266,9 +263,7 @@ static void missile_launch_update(SpriteActor *self, TankSprite *sub) {
     sub->launch_counter = launch_interval;
 
     SpritePosition launch_position = self->position;
-    launch_position.x += (self->direction == RIGHT ? launch_flip_offset : 0);
-
-    sa_apply_offset(&launch_offsets[sub->missiles_launched++], &launch_position);
+    sa_apply_offset_flip(&launch_offsets[sub->missiles_launched++], &launch_position, self->direction);
 
     SpriteActorLight *missile = missile_sprite_init(&launch_position);
     if (!missile) {

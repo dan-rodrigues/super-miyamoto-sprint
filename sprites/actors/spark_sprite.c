@@ -8,8 +8,6 @@
 #include "debug_print.h"
 #include "sprite_drawing.h"
 
-static const uint8_t SPARK_LIFETIME = 4;
-
 void spark_sprite_main(SpriteActorLight *self, const SpriteEnvironment *env) {
     SparkSprite *sub = &self->spark;
 
@@ -22,8 +20,9 @@ void spark_sprite_main(SpriteActorLight *self, const SpriteEnvironment *env) {
 
     sa_draw_standard_8x8_light(self, env, tile, palette);
 
-    sub->life_counter++;
-    if (sub->life_counter == SPARK_LIFETIME) {
+    const uint8_t lifetime = 4;
+
+    if (++sub->life_counter == lifetime) {
         sa_free_light(self);
     }
 }

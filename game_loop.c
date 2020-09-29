@@ -64,7 +64,7 @@ GameLoopAction gl_run_frame(GameContext *context) {
         step_frame(hero, camera);
 
         // Simple "CPU meter" which just prints the value of the raster counter
-        st_write_hex(VDP_CURRENT_RASTER_Y, 320, 50);
+        st_write_hex(VDP_CURRENT_RASTER_Y, 8, 8);
     }
 
     // Finished entire frame worth of processing
@@ -108,7 +108,9 @@ static void step_frame(Hero *hero, Camera *camera) {
     // There's "jitter" otherwise as camera / sprites don't appear in sync
     hero_draw_draw_coin_counter(hero);
     hero_draw_life_meter(hero);
-    draw_hero_sprites(hero, 0, camera);
+
+    hero_draw(hero, 0, camera);
+    // hero_update_palette();
 
     // 3. Non-rideable sprites run after hero as hero's position isn't influenced by them
     sa_run_non_rideable(&sprite_draw_context);
@@ -117,7 +119,7 @@ static void step_frame(Hero *hero, Camera *camera) {
     sa_run_light(&sprite_draw_context);
 
     // VRAM animation queueing (auto-animated blocks such as muncher plants and lava)
-    vram_queue_animations();
+    vram_update_animations();
 
     dbg_print_sandbox_instructions();
     dbg_print_status(TEXT_PALETTE_ID, hero, camera);

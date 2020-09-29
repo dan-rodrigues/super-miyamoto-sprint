@@ -268,6 +268,11 @@ void sa_apply_offset(const SpriteOffset *offset, SpritePosition *position) {
     position->y += offset->y;
 }
 
+void sa_apply_offset_flip(const SpriteOffset *offset, SpritePosition *position, SpriteDirection direction) {
+    position->x += (direction == LEFT ? offset->x : -offset->x);
+    position->y += offset->y;
+}
+
 static bool onscreen(int32_t screen_x,
                      int32_t screen_y,
                      int32_t padding_x,
