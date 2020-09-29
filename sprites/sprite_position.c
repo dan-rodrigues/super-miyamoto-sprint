@@ -137,7 +137,7 @@ void sa_apply_horizontal_block_interaction_updates(SpriteActor *actor,
 }
 
 bool sa_within_live_bounds(const SpritePosition *position, const Camera *camera) {
-    const int32_t live_bounds = 64;
+    const int32_t live_bounds = 96;
     // Allowed distance off bottom of screen
     const int32_t padding_bottom = 16;
     // Allowed distance off top of screen (i.e. item that is kicked up)

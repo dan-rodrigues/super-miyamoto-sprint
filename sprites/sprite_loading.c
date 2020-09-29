@@ -26,20 +26,27 @@ typedef struct {
     uint8_t padding;
 } __attribute__((packed)) SpriteLevelEncoded;
 
+typedef struct {
+    int32_t left, right;
+} SpriteLoadingBounds;
+
 static const SpriteLevelEncoded *sprite_data_base;
 static const SpriteLevelEncoded *sprite_data_end;
-static uint16_t total_sprite_count = 0;
+static uint16_t total_sprite_count;
 
-// Can pack this into bit-array if needed
 static bool loadable_sprite_indexes[SPRITE_INDEX_MAX];
 
-static int32_t next_left_index = 0;
-static int32_t next_right_index = 0;
+static int32_t next_left_index;
+static int32_t next_right_index;
 
-static CameraScroll scroll_last_update = {0, 0};
+static uint16_t previous_left_scroll;
+static uint16_t previous_right_scroll;
 
 static void init_sprite(const SpriteLevelEncoded *sprite, const Hero *hero, int8_t index);
 static SpriteActor *sprite_factory(const SpriteLevelEncoded *sprite, const SpritePosition *position);
+
+static void update_left_scroll(int32_t new_scroll, const Hero *hero);
+static void update_right_scroll(int32_t new_scroll, const Hero *hero);
 
 void sprite_level_data_init(const void *sprite_data, size_t sprite_data_length) {
     // Assumes offset (0, 0) in the level
@@ -49,28 +56,94 @@ void sprite_level_data_init(const void *sprite_data, size_t sprite_data_length) 
     sprite_data_end = sprite_data_base + count;
     total_sprite_count = count;
 
-    next_left_index = 0;
-    next_right_index = count - 1;
-
     memset(loadable_sprite_indexes, true, sizeof(loadable_sprite_indexes));
 }
 
-// Load all sprites from the left span of the screen to the right
+static void loading_bounds(const Camera *camera, SpriteLoadingBounds *bounds) {
+    const int32_t padding = 48;
+
+    bounds->left = camera->scroll.x - padding;
+    bounds->right = camera->scroll.x + SCREEN_ACTIVE_WIDTH + padding;
+}
+
+// Load all sprites that are currently visible on screen
+
 void sprite_level_data_perform_initial_load(const Camera *camera, const Hero *hero) {
     assert(sprite_data_base);
     assert(sprite_data_end);
 
-    scroll_last_update.x = -1;
-    scroll_last_update.y = -1;
+    // Seek to sprite data starting from the center of the screen
 
-    // Start loading from left of current screen position..
+    int32_t center = camera->scroll.x + SCREEN_ACTIVE_WIDTH / 2;
+
+    int32_t center_index = MAX(0, total_sprite_count - 1);
+    for (uint32_t i = 0; i < total_sprite_count; i++) {
+        if (sprite_data_base[i].x >= center) {
+            center_index = i;
+            break;
+        }
+    }
+
+    int32_t left_index = center_index;
+    int32_t right_index = MIN(total_sprite_count - 1, left_index + 1);
+    right_index = MAX(0, right_index);
+
+    next_left_index = left_index;
+    next_right_index = right_index;
+
+    // Then load initial left / right half of screen sprites
+
+    previous_left_scroll = center;
+    previous_right_scroll = center;
     sprite_level_data_load_new(camera, hero);
+}
 
-    // ..then sweep from left to right and load all sprites
-    int32_t right = camera->scroll.x + SCREEN_ACTIVE_WIDTH;
-    Camera dummy_camera = *camera;
-    dummy_camera.scroll.x = right;
-    sprite_level_data_load_new(&dummy_camera, hero);
+static void update_left_scroll(int32_t new_scroll, const Hero *hero) {
+    if (previous_left_scroll == new_scroll) {
+        return;
+    }
+
+    bool moved_left = new_scroll < previous_left_scroll;
+    if (moved_left) {
+        while (next_left_index >= 0) {
+            SpriteLevelEncoded next_left_sprite = sprite_data_base[next_left_index];
+            if (next_left_sprite.x <= new_scroll) {
+                break;
+            }
+
+            init_sprite(&next_left_sprite, hero, next_left_index);
+            next_left_index--;
+        }
+    } else {
+        while (sprite_data_base[++next_left_index].x <= new_scroll) {}
+        next_left_index--;
+    }
+
+    previous_left_scroll = new_scroll;
+}
+
+static void update_right_scroll(int32_t new_scroll, const Hero *hero) {
+    if (previous_right_scroll == new_scroll) {
+        return;
+    }
+
+    bool moved_right = new_scroll > previous_right_scroll;
+    if (moved_right) {
+        while (next_right_index < total_sprite_count) {
+            SpriteLevelEncoded next_right_sprite = sprite_data_base[next_right_index];
+            if (next_right_sprite.x > new_scroll) {
+                break;
+            }
+
+            init_sprite(&next_right_sprite, hero, next_right_index);
+            next_right_index++;
+        }
+    } else {
+        while (sprite_data_base[--next_right_index].x > new_scroll) {}
+        next_right_index++;
+    }
+
+    previous_right_scroll = new_scroll;
 }
 
 // Load sprites that have just come into bounds of the camera
@@ -79,55 +152,11 @@ void sprite_level_data_perform_initial_load(const Camera *camera, const Hero *he
 
 __attribute__((optimize("-fno-strict-aliasing")))
 void sprite_level_data_load_new(const Camera *camera, const Hero *hero) {
-    if (scroll_last_update.x == camera->scroll.x) {
-        return;
-    }
+    SpriteLoadingBounds bounds;
+    loading_bounds(camera, &bounds);
 
-    bool moved_left = scroll_last_update.x > camera->scroll.x;
-
-    const int32_t horizontal_margin = 40;
-    int32_t left_bound = camera->scroll.x - horizontal_margin;
-    int32_t right_bound = camera->scroll.x + SCREEN_ACTIVE_WIDTH + horizontal_margin;
-
-    if (moved_left) {
-        // Moving towards left
-
-        // Is the next sprite to be loaded on screen?
-        while (next_left_index >= 0) {
-            SpriteLevelEncoded next_left_sprite = sprite_data_base[next_left_index];
-            if (next_left_sprite.x <= left_bound) {
-                // No more sprites to see on screen (yet)
-                break;
-            }
-
-            init_sprite(&next_left_sprite, hero, next_left_index);
-            next_left_index--;
-        }
-
-        // Fix next-right sprite as the right bound may have moved beyond it
-        while (sprite_data_base[--next_right_index].x > right_bound) {}
-        next_right_index++;
-    } else {
-        // Moving towards right
-
-        // Is the next sprite to be loaded on screen?
-        while (next_right_index < total_sprite_count) {
-            SpriteLevelEncoded next_right_sprite = sprite_data_base[next_right_index];
-            if (next_right_sprite.x > right_bound) {
-                // No more sprites to see on screen (yet)
-                break;
-            }
-
-            init_sprite(&next_right_sprite, hero, next_right_index);
-            next_right_index++;
-        }
-
-        // Fix next-left sprite, as above
-        while (sprite_data_base[++next_left_index].x <= left_bound) {}
-        next_left_index--;
-    }
-
-    scroll_last_update = camera->scroll;
+    update_left_scroll(bounds.left, hero);
+    update_right_scroll(bounds.right, hero);
 
     // The indexes are allowed to go 1 beyond their limit
     assert(next_left_index >= -1);
