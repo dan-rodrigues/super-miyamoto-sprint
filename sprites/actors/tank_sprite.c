@@ -332,13 +332,13 @@ static bool can_see_hero(const SpriteActor *self, const Hero *hero) {
 }
 
 static void enemy_driver_update(SpriteActor *self, TankSprite *sub, const Hero *hero) {
-    const uint8_t patrol_duration = 20;
+    const uint8_t patrol_duration = 120;
 
     sub->current_state_duration++;
 
     switch (sub->enemy_driver_state) {
         case TANK_STATE_PATROL_ACCEL: {
-            const int32_t accel = Q_1 / 8;
+            const int32_t accel = Q_1 / 32;
             const int32_t max_speed = Q_1 / 2;
             sa_horizontal_acceleration(&self->velocity, self->direction, accel, max_speed);
 
@@ -349,7 +349,7 @@ static void enemy_driver_update(SpriteActor *self, TankSprite *sub, const Hero *
             }
         } break;
         case TANK_STATE_PATROL_DECEL: {
-            const int32_t decel = Q_1 / 8;
+            const int32_t decel = Q_1 / 32;
             sa_horizontal_deceleration(&self->velocity, decel);
 
             if (can_see_hero(self, hero)) {

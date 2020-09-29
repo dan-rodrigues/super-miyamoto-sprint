@@ -62,10 +62,10 @@ GameLoopAction gl_run_frame(GameContext *context) {
 
     if (!context->paused) {
         step_frame(hero, camera);
-    }
 
-    // Simple "CPU meter" which just prints the value of the raster counter
-    st_write_hex(VDP_CURRENT_RASTER_Y, 320, 50);
+        // Simple "CPU meter" which just prints the value of the raster counter
+        st_write_hex(VDP_CURRENT_RASTER_Y, 320, 50);
+    }
 
     // Finished entire frame worth of processing
     vdp_wait_frame_ended();
