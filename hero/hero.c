@@ -646,7 +646,7 @@ HeroSpriteCarryUpdateResult hero_sprite_carry_update(Hero *hero, const SpriteAct
     bool carrying_other_sprite = !carrying_this_sprite;
     carrying_other_sprite &= carried_sprite_live;
 
-    bool should_carry = (pad->y && !hero->climbing);
+    bool should_carry = (pad->y && !hero->climbing && !hero_in_any_vehicle(hero));
 
     // If another sprite is already being carried, all other carryable sprites are ignored
     if (carrying_other_sprite) {
