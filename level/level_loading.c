@@ -14,6 +14,7 @@
 #include "debug_print.h"
 #include "vram_animated_tiles.h"
 #include "global_timers.h"
+#include "extra_task.h"
 
 #include "bg_hills_no_clouds.h"
 #include "bg_hills_clouds.h"
@@ -27,25 +28,16 @@
 #include "spr06_07_tiles.h"
 
 void level_load(const LevelAttributes *attributes) {
-    VDPLayer visible_layers = SCROLL0 | SCROLL1 | SCROLL2 | SPRITES;
-
-#ifdef DEBUG_PRINT
-    visible_layers |= SCROLL1;
-#endif
-
-    vdp_enable_layers(visible_layers);
-
     sb_reset();
     sa_reset();
     vcq_reset();
     pb_reset();
     acq_reset();
     gt_reset();
+    et_reset();
 
     // Foregound is a 512x512 map tiled repeatedly
     vdp_set_wide_map_layers(SCROLL0);
-    vdp_set_alpha_over_layers(0);
-
     vdp_set_vram_increment(1);
 
     // Clear all VRAM

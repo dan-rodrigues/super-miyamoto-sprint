@@ -15,7 +15,8 @@ void hero_level_init(Hero *hero, const LevelAttributes *attributes) {
         .pad = {},
         .pad_edge = {},
         
-        .frame = RUN0,
+        .frame = HF_RUN0,
+        .uploaded_frame = HF_UNDEFINED,
         .frame_counter = 0,
         .visible = true,
 

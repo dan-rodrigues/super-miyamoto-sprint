@@ -44,11 +44,14 @@ SOURCES = \
 	sprites/actors/tank_driver_sprite.c \
 	sprites/actors/missile_sprite.c \
 	sprites/actors/spark_sprite.c \
+	tasks/extra_task.c \
+	tasks/extra_task_handle.c \
+	tasks/level_reload_sequence_task.c \
+	tasks/fade_task.c \
 	level/camera.c \
 	level/camera_init.c \
 	level/block.c \
 	level/level_attributes.c \
-	level/level_loading.c \
 	timers/global_timers.c \
 	vram/vram_command_queue.c \
 	vram/vram_level_update.c \
@@ -63,21 +66,28 @@ SOURCES = \
 	debug/debug_block.c \
 	debug/debug_print.c \
 	debug/debug_playfield.c \
-	debug/debug_custom_assert.c \
-	gcc_lib/gcc_lib.c
+	gcc_lib/gcc_lib.c \
+
+LIB_SOURCES := \
+	vdp.c \
+	math_util.c \
+	assert.c \
+	vdp_print.c \
+	audio.c \
+	gamepad.c
 
 SOURCES += $(addprefix $(ICS32_SW_DIR)common/, \
 	font.c \
 	tinyprintf.c \
 	)
 
-SOURCES += $(addprefix $(ICS32_SW_DIR)lib/, \
-	vdp.c \
-	math_util.c \
-	assert.c \
-	vdp_print.c \
-	audio.c \
-	gamepad.c \
+CPU_SLOW_SOURCES := \
+	debug/debug_custom_assert.c \
+	level/level_loading.c
+
+CPU_SLOW_SOURCES += $(addprefix $(ICS32_SW_DIR)common/, \
+	font.c \
+	tinyprintf.c \
 	)
 
 ###
@@ -176,7 +186,7 @@ ARTEFACTS += $(ADPCM_FILES)
 # These must be set before core.mk is included
 
 FLASH_ADPCM_SOURCES := $(ADPCM_FILES:%.adpcm=%.c)
-FLASH_CPU_SOURCES := $(GFX_SOURCES) $(LEVEL_SOURCES) $(MAPS_SOURCES)
+FLASH_CPU_SOURCES := $(GFX_SOURCES) $(LEVEL_SOURCES) $(MAPS_SOURCES) $(CPU_SLOW_SOURCES)
 
 ARTEFACTS += $(FLASH_ADPCM_SOURCES)
 
@@ -191,15 +201,40 @@ include $(ICS32_DIR)software/common/core.mk
 $(eval $(call persisted_var,MUSIC))
 $(eval $(call persisted_var,DEBUG_PRINT))
 
-CFLAGS += -Ihero/ -Isprites/ -Isprites/actors/ -Ilevel/ -Ivram/ -Idebug/ -Iaudio/ -Ipalette/ -Iassets/audio/ -Igcc_lib/ -Iassets/graphics/ -Iassets/misc/ -Iassets/levels/ -Iassets/maps/ -Itimers/
+CFLAGS_INCLUDE_DIRS := $(addprefix -I, \
+	./ \
+	hero/ \
+	sprites/ \
+	sprites/actors/ \
+	level/ \
+	vram/ \
+	debug/ \
+	audio/ \
+	palette/ \
+	assets/audio/ \
+	gcc_lib/ \
+	assets/graphics/ \
+	assets/misc/ \
+	assets/levels/ \
+	assets/maps/ \
+	timers/ \
+	tasks/ \
+	)
+
+EXTRA_CFLAGS := $(CFLAGS_INCLUDE_DIRS)
 
 ifeq ($(MUSIC), 1)
-CFLAGS += -DMUSIC_INCLUDED
+EXTRA_CFLAGS += -DMUSIC_INCLUDED
 endif
 
 ifeq ($(DEBUG_PRINT), 1)
-CFLAGS += -DDEBUG_PRINT
+EXTRA_CFLAGS += -DDEBUG_PRINT
 endif
+
+###
+
+CFLAGS += $(EXTRA_CFLAGS)
+RC_CFLAGS += $(EXTRA_CFLAGS)
 
 ###
 

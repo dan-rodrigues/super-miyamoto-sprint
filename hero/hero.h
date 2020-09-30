@@ -21,34 +21,37 @@ extern const uint8_t HERO_SPRINT_CHARGE_TIME;
 extern const HeroFrame HERO_IDLE_FRAME;
 
 enum HeroFrame {
-    RUN0, RUN1, RUN2,
-    SPRINT0, SPRINT1, SPRINT2,
-    CARRY0, CARRY1, CARRY2,
+    HF_RUN0, HF_RUN1, HF_RUN2,
+    HF_SPRINT0, HF_SPRINT1, HF_SPRINT2,
+    HF_CARRY0, HF_CARRY1, HF_CARRY2,
 
-    KICK,
+    HF_KICK,
 
-    DRIVING,
+    HF_DRIVING,
 
-    CLIMBING0, CLIMBING1,
+    HF_CLIMBING0, HF_CLIMBING1,
     
-    RUN_TURNING,
+    HF_RUN_TURNING,
 
-    JUMP_RISING, JUMP_FALLING,
-    JUMP_SPRINTING,
+    HF_JUMP_RISING, HF_JUMP_FALLING,
+    HF_JUMP_SPRINTING,
 
-    LOOKING_UP,
+    HF_LOOKING_UP,
 
-    LOOKING_SCREEN_DIRECT,
-    LOOKING_SCREEN_LEFT,
-    LOOKING_SCREEN_RIGHT,
+    HF_LOOKING_SCREEN_DIRECT,
+    HF_LOOKING_SCREEN_LEFT,
+    HF_LOOKING_SCREEN_RIGHT,
 
-    DUCKING,
+    HF_DUCKING,
 
-    PEACE_SIGN
+    HF_PEACE_SIGN,
+
+    HF_UNDEFINED
 };
 
 struct Hero {
     HeroFrame frame;
+    HeroFrame uploaded_frame;
     int32_t frame_counter;
     uint8_t animation_counter;
 
