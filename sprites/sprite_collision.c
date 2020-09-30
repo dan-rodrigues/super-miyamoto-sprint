@@ -18,6 +18,10 @@ static bool has_collision_2_abs(const SpriteBoundingBoxAbs *p1,
 static void projectile_kill(SpriteActor *actor);
 
 bool sa_has_hero_collision(const SpriteActor *actor, const Hero *hero) {
+    if (hero->dead) {
+        return false;
+    }
+
     return has_collision_1_abs(&hero->bounding_box_abs, &actor->position, &actor->bounding_box);
 }
 
@@ -39,8 +43,8 @@ SpriteHeroCollisionResult sa_hero_standard_collision(SpriteActor *actor, Hero *h
         actor->carried = false;
     }
 
-    bool kicked = (carry_result == HERO_SPRITE_CARRY_UPDATE_KICKED
-        || carry_result == HERO_SPRITE_CARRY_UPDATE_KICKED_UP);
+    bool kicked = (carry_result == HERO_SPRITE_CARRY_UPDATE_KICKED);
+    kicked |= (carry_result == HERO_SPRITE_CARRY_UPDATE_KICKED_UP);
 
     if (kicked) {
         // Draw impact sprite at the kick point
@@ -237,6 +241,10 @@ bool sa_light_sprite_collision(SpriteActorLight *actor) {
 }
 
 bool sa_hero_standard_collision_light(SpriteActorLight *actor, Hero *hero) {
+    if (hero->dead) {
+        return false;
+    }
+
     if (!actor->hurts_hero) {
         return false;
     }

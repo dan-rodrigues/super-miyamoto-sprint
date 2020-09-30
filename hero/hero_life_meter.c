@@ -7,14 +7,21 @@
 #include "hero.h"
 #include "sprite_buffer.h"
 #include "sprite_text.h"
+#include "sound_effects.h"
 
 static void draw_heart(uint32_t x, uint32_t y, bool filled);
+
+void hero_increase_hit_point_max(Hero *hero) {
+    hero->life_max++;
+    hero->life = hero->life_max;
+    se_powerup();
+}
 
 void hero_draw_life_meter(const Hero *hero) {
     const uint16_t x = 16;
     const uint16_t y = 48;
 
-    for (uint32_t i = 0; i < HERO_DEFAULT_LIFE; i++) {
+    for (uint32_t i = 0; i < hero->life_max; i++) {
         draw_heart(x, y + i * 16, (hero->life > i));
     }
 }

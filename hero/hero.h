@@ -75,6 +75,10 @@ struct Hero {
     bool damage_causes_hop;
 
     uint8_t life;
+    uint8_t life_max;
+    uint8_t death_timer;
+    bool dead;
+    
     uint8_t invulnerability_counter;
     bool visible;
 

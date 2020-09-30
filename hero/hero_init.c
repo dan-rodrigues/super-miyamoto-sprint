@@ -5,6 +5,10 @@
 void hero_level_init(Hero *hero, const LevelAttributes *attributes) {
     static const Hero hero_initialized = {
         .life = 0,
+        .life_max = 0,
+        .death_timer = 0,
+        .dead = false,
+
         .coins = 0,
         .invulnerability_counter = 0,
 
@@ -53,6 +57,8 @@ void hero_level_init(Hero *hero, const LevelAttributes *attributes) {
     hero->position = hero_position;
 
     hero->life = HERO_DEFAULT_LIFE;
+    hero->life_max = HERO_DEFAULT_LIFE;
+
     hero->frame = HERO_IDLE_FRAME;
     hero->platform_sprite_handle = SA_HANDLE_FREE;
     hero->vehicle_sprite_handle = SA_HANDLE_FREE;

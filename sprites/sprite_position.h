@@ -81,6 +81,7 @@ bool sa_platform_ride_check(SpriteActor *platform,
 void sa_platform_dismount(const SpriteActor *platform, SpriteVelocity *velocity, SpriteActorHandle *rider_handle);
 
 void sa_apply_offset(const SpriteOffset *offset, SpritePosition *position);
+void sa_apply_offset_flip(const SpriteOffset *offset, SpritePosition *position, SpriteDirection direction);
 
 void sa_grounded_update(SpriteActor *actor, int32_t displacement);
 

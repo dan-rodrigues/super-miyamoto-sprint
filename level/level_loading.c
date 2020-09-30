@@ -119,4 +119,8 @@ void level_load(const LevelAttributes *attributes) {
     // Sprite level data setup
 
     sprite_level_data_init(attributes->sprite_data, *attributes->sprite_data_length);
+
+    // Initial animation frames since they may not be visible immediately otherwise
+    
+    vram_init_animations();
 }

@@ -7,6 +7,6 @@
 
 #include "camera.h"
 
-void draw_hero_sprites(Hero *hero, int16_t sprite_tile, Camera *camera);
+void hero_draw(Hero *hero, int16_t sprite_tile, Camera *camera);
 
 #endif /* hero_drawing_h */

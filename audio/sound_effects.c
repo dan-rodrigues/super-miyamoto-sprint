@@ -10,6 +10,8 @@
 #include "hurt.h"
 #include "launch.h"
 #include "explosion.h"
+#include "powerup.h"
+#include "dead.h"
 
 static void queue_sound(const int16_t *data, size_t length, int8_t volume, uint8_t channel);
 
@@ -38,9 +40,20 @@ void se_explosion() {
     queue_sound(explosion, explosion_length, 0x08, channel);
 }
 
+void se_powerup() {
+    const uint8_t channel = 6;
+    queue_sound(powerup, powerup_length, 0x08, channel);
+}
+
 void se_hero_hurt() {
     const uint8_t channel = 6;
     queue_sound(hurt, hurt_length, 0x10, channel);
+}
+
+// Could use a pitch slide down instead of just storing another sample
+void se_hero_dead() {
+    const uint8_t channel = 6;
+    queue_sound(dead, dead_length, 0x10, channel);
 }
 
 void se_missile_launch() {
