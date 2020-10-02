@@ -4,6 +4,7 @@
 
 #include "vdp.h"
 #include "gcc_lib.h"
+#include "math_util.h"
 
 #define PALETTE_SIZE 16
 #define PALETTE_COUNT 16
@@ -34,6 +35,10 @@ void pb_queue_all() {
     bg_color_needs_upload = true;
 }
 
+void pb_queue_palette(uint8_t palette_id) {
+    palette_needs_upload[palette_id] = true;
+}
+
 void pb_alpha_mask_all(uint8_t alpha) {
     uint16_t alpha_mask = alpha << 12;
 
@@ -43,6 +48,42 @@ void pb_alpha_mask_all(uint8_t alpha) {
 
     use_modified_palette = true;
     pb_queue_all();
+}
+
+static uint8_t lerp_channel(uint8_t from, uint8_t to, uint8_t step) {
+    uint8_t delta = to - from;
+    uint8_t scaled_distance = (sys_multiply(delta, step) + 8) / 0x10;
+    return from + scaled_distance;
+}
+
+void pb_lerp_palette_to_white(uint8_t palette_id, uint16_t mask, uint8_t step) {
+    for (uint32_t i = 1; i < 16; i++) {
+        if (!((mask >> i) & 1)) {
+            continue;
+        }
+
+        pb_lerp_to_white(palette_id * 0x10 + i, step);
+    }
+}
+
+void pb_lerp_to_white(uint8_t color_id, uint8_t step) {
+    uint16_t color = palette_preloaded[color_id];
+
+    uint8_t r = color & 0xf;
+    color &= ~0xf;
+    color |= lerp_channel(r, 0xf, step);
+
+    uint8_t g = color >> 4 & 0xf;
+    color &= ~(0xf << 4);
+    color |= lerp_channel(g, 0xf, step) << 4;
+
+    uint8_t b = color >> 8 & 0xf;
+    color &= ~(0xf << 8);
+    color |= lerp_channel(b, 0xf, step) << 8;
+
+    palette_modified[color_id] = color;
+    use_modified_palette = true;
+    pb_queue_palette(color_id / 0x10);
 }
 
 void pb_reset() {

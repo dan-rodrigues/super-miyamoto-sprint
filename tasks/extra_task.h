@@ -11,6 +11,7 @@
 
 #include "fade_task.h"
 #include "level_reload_sequence_task.h"
+#include "palette_lerp_task.h"
 
 struct ExtraTask {
     ExtraTaskMain main;
@@ -18,6 +19,7 @@ struct ExtraTask {
 
     union {
         FadeTask fade;
+        PaletteLerpTask palette_lerp;
         LevelReloadSequenceTask level_reload_sequence;
     };
 };

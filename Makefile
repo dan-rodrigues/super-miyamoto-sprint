@@ -48,6 +48,7 @@ SOURCES = \
 	tasks/extra_task_handle.c \
 	tasks/level_reload_sequence_task.c \
 	tasks/fade_task.c \
+	tasks/palette_lerp_task.c \
 	level/camera.c \
 	level/camera_init.c \
 	level/block.c \
