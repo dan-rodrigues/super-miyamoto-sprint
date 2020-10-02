@@ -1,5 +1,7 @@
 #include "debug_playfield.h"
 
+#include "vdp.h"
+
 #include "hero.h"
 #include "camera.h"
 #include "camera_init.h"
@@ -14,8 +16,15 @@
 #include "debug_print.h"
 #include "game_loop.h"
 #include "sprite_text.h"
+#include "fade_task.h"
+#include "palette_buffer.h"
 
 void dbg_init_playfield(GameContext *context) {
+    // Disable the display while preparing the level / display
+    vdp_set_alpha_over_layers(0);
+    vdp_enable_layers(0);
+    vdp_set_single_palette_color(0, 0x0000);
+
     const PlayerContext *p1 = &context->players[0];
 
     // Initialization:
@@ -24,17 +33,20 @@ void dbg_init_playfield(GameContext *context) {
     level_load(attributes);
 
     hero_level_init(p1->hero, attributes);
-
     camera_init(p1->camera, p1->hero, block_map_table);
-
-    // Initial sprite load
-    // Note initial level load is rolled into the above camera_init!
-    // ..might not be the best idea
     sprite_level_data_perform_initial_load(p1->camera, p1->hero);
 
     dbg_print_init();
 
     context->paused = false;
+
+    const bool skip_fade_in = false;
+
+    if (!skip_fade_in) {
+        fade_task_init(FADE_IN);
+    } else {
+        pb_alpha_mask_all(0xf);
+    }
 }
 
 void dbg_reset_sprites(Hero *hero) {

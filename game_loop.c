@@ -33,7 +33,10 @@
 
 #include "global_timers.h"
 
-static void step_frame(Hero *hero, Camera *camera);
+#include "extra_task.h"
+
+static GameLoopAction step_frame(Hero *hero, Camera *camera);
+static void enable_display(void);
 
 GameLoopAction gl_run_frame(GameContext *context) {
     PlayerContext *p1 = &context->players[0];
@@ -60,8 +63,10 @@ GameLoopAction gl_run_frame(GameContext *context) {
 
     // (later: copper updates if applicable)
 
+    GameLoopAction result_action = GL_ACTION_NONE;
+
     if (!context->paused) {
-        step_frame(hero, camera);
+        result_action = step_frame(hero, camera);
 
         // Simple "CPU meter" which just prints the value of the raster counter
         st_write_hex(VDP_CURRENT_RASTER_Y, 8, 8);
@@ -81,11 +86,15 @@ GameLoopAction gl_run_frame(GameContext *context) {
         camera_apply_scroll(camera);
         acq_run();
     }
-    
-    return GL_ACTION_NONE;
+
+    // Only enable display after all the above attributes have been set
+    // This adds 1 extra frame of disabled display after loading a level too
+    enable_display();
+
+    return result_action;
 }
 
-static void step_frame(Hero *hero, Camera *camera) {
+static GameLoopAction step_frame(Hero *hero, Camera *camera) {
     // (may later replace with just GameContext)
     SpriteEnvironment sprite_draw_context = {
         .camera = camera,
@@ -118,6 +127,9 @@ static void step_frame(Hero *hero, Camera *camera) {
     // 4. Light sprite actors run last and they cannot alter the position of regular sprite actors
     sa_run_light(&sprite_draw_context);
 
+    // Run additional tasks, potentially altering the game loop
+    GameLoopAction task_result_action = et_run();
+
     // VRAM animation queueing (auto-animated blocks such as muncher plants and lava)
     vram_update_animations();
 
@@ -125,4 +137,17 @@ static void step_frame(Hero *hero, Camera *camera) {
     dbg_print_status(TEXT_PALETTE_ID, hero, camera);
 
     gt_tick();
+
+    return task_result_action;
+}
+
+static void enable_display() {
+    VDPLayer visible_layers = SCROLL0 | SCROLL1 | SCROLL2 | SPRITES;
+
+    #ifdef DEBUG_PRINT
+        visible_layers |= SCROLL1;
+    #endif
+
+    // Enable display now that level / display are prepared
+    vdp_enable_layers(visible_layers);
 }

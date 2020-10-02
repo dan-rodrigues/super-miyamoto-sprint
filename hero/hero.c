@@ -11,12 +11,13 @@
 #include "sprite_collision.h"
 #include "debug_print.h"
 #include "hero_life_meter.h"
+#include "level_reload_sequence_task.h"
 
-const HeroFrame HERO_IDLE_FRAME = RUN2;
+const HeroFrame HERO_IDLE_FRAME = HF_RUN2;
 
 const uint8_t HERO_SPRINT_CHARGE_TIME = 60;
 const uint8_t HERO_INVULNERABILITY_COUNT = 60 * 2;
-const uint8_t HERO_DEFAULT_LIFE = 4;
+const uint8_t HERO_DEFAULT_LIFE = 1;
 
 typedef struct {
     bool vine;
@@ -24,8 +25,8 @@ typedef struct {
     bool grounded;
 } HeroBlockAttributesProcessedContext;
 
-static const HeroFrame HERO_IDLE_CARRYING_FRAME = CARRY2;
-static const HeroFrame HERO_JUMP_CARRYING_FRAME = CARRY0;
+static const HeroFrame HERO_IDLE_CARRYING_FRAME = HF_CARRY2;
+static const HeroFrame HERO_JUMP_CARRYING_FRAME = HF_CARRY0;
 
 static const SpriteBoundingBox *block_horizontal_bounding_box(const Hero *hero);
 static const SpriteBoundingBox *block_vertical_bounding_box(const Hero *hero);
@@ -369,9 +370,9 @@ static void update_frame(Hero *hero) {
     }
 
     if (hero_in_any_vehicle(hero)) {
-        hero->frame = DRIVING;
+        hero->frame = HF_DRIVING;
     } else if (hero->ducking) {
-        hero->frame = DUCKING;
+        hero->frame = HF_DUCKING;
     } else if (hero->climbing) {
         const int32_t climb_frame_duration = Q_1 * 8;
 
@@ -384,9 +385,9 @@ static void update_frame(Hero *hero) {
             hero->animation_counter++;
         }
 
-        hero->frame = (hero->animation_counter % 2) ? CLIMBING0 : CLIMBING1;
+        hero->frame = (hero->animation_counter % 2) ? HF_CLIMBING0 : HF_CLIMBING1;
     } else if (show_kick_frame) {
-        hero->frame = KICK;
+        hero->frame = HF_KICK;
     } else if (hero->grounded) {
         const int32_t hero_default_frame_duration = 4 * Q_1;
         const int32_t hero_sprinting_frame_duration = 2 * Q_1;
@@ -396,7 +397,7 @@ static void update_frame(Hero *hero) {
         }
 
         if (hero->quick_turning) {
-            hero->frame = (carrying ? CARRY1 : RUN_TURNING);
+            hero->frame = (carrying ? HF_CARRY1 : HF_RUN_TURNING);
             return;
         } else if (hero->against_solid_block || hero->velocity.x == 0) {
             hero->frame = (carrying ? HERO_IDLE_CARRYING_FRAME : HERO_IDLE_FRAME);
@@ -420,9 +421,9 @@ static void update_frame(Hero *hero) {
 
         // Frame selection
 
-        static const HeroFrame run_frames[] = {RUN0, RUN1, RUN2};
-        static const HeroFrame sprint_frames[] = {SPRINT0, SPRINT1, SPRINT2};
-        static const HeroFrame carry_frames[] = {CARRY0, CARRY1, CARRY2};
+        static const HeroFrame run_frames[] = {HF_RUN0, HF_RUN1, HF_RUN2};
+        static const HeroFrame sprint_frames[] = {HF_SPRINT0, HF_SPRINT1, HF_SPRINT2};
+        static const HeroFrame carry_frames[] = {HF_CARRY0, HF_CARRY1, HF_CARRY2};
 
         const HeroFrame *frames = run_frames;
         if (carrying) {
@@ -437,9 +438,9 @@ static void update_frame(Hero *hero) {
         if (carrying) {
             hero->frame = HERO_JUMP_CARRYING_FRAME;
         } else if (hero->sprint_jumping) {
-            hero->frame = JUMP_SPRINTING;
+            hero->frame = HF_JUMP_SPRINTING;
         } else {
-            hero->frame = (hero->velocity.y < 0 ? JUMP_RISING : JUMP_FALLING);
+            hero->frame = (hero->velocity.y < 0 ? HF_JUMP_RISING : HF_JUMP_FALLING);
         }
     }
 }
@@ -928,6 +929,7 @@ static bool liveness_check(Hero *hero) {
         draw_death_decoration(hero);
 
         se_hero_dead();
+        level_reload_sequence_task_init();
     }
 
     return false;
