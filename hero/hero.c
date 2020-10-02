@@ -17,7 +17,7 @@ const HeroFrame HERO_IDLE_FRAME = HF_RUN2;
 
 const uint8_t HERO_SPRINT_CHARGE_TIME = 60;
 const uint8_t HERO_INVULNERABILITY_COUNT = 60 * 2;
-const uint8_t HERO_DEFAULT_LIFE = 1;
+const uint8_t HERO_DEFAULT_LIFE = 4;
 
 typedef struct {
     bool vine;
