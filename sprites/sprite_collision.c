@@ -139,7 +139,7 @@ void sa_other_sprite_platform_check(SpriteActor *platform) {
 // This allows sprites to bump into each other and turn away
 
 bool sa_other_sprite_collision(SpriteActor *actor) {
-    if (actor->killed) {
+    if (actor->killed || !actor->interacts_with_sprites) {
         return false;
     }
 
@@ -159,7 +159,7 @@ bool sa_other_sprite_collision(SpriteActor *actor) {
             continue;
         }
 
-        if (actor->carried || actor->kills_other_sprites) {
+        if (!other->immune_to_projectiles && (actor->carried || actor->kills_other_sprites)) {
             // Impact sprite to be drawn at center of overlapping region
             SpriteBoundingBoxAbs overlap_box, other_box_abs;
             sa_bounding_box_abs(&other->position, &other->bounding_box, &other_box_abs);
@@ -228,7 +228,7 @@ bool sa_light_sprite_collision(SpriteActorLight *actor) {
         if (!has_collision_2_abs(&box_abs, &other->bounding_box_abs)) {
             continue;
         }
-        if (other->immune_to_missiles) {
+        if (other->immune_to_projectiles) {
             continue;
         }
 

@@ -72,7 +72,6 @@ void tank_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
     }
 
     self->can_ride = !hero_driving;
-    self->interacts_with_sprites = !hero_driving;
     self->stomp_hurts_hero = enemy_driving;
     self->touch_hurts_hero = enemy_driving;
 
@@ -383,7 +382,7 @@ static void enemy_driver_update(SpriteActor *self, TankSprite *sub, const Hero *
 static void position_driver(SpriteActor *self, TankSprite *sub) {
     SpriteActor *driver = sa_get(sub->driver_enemy_handle);
 
-    const SpriteOffset driver_offset = { 0, -16 };
+    const SpriteOffset driver_offset = { 0, -18 };
     driver->position = self->position;
     sa_apply_offset(&driver_offset, &driver->position);
 
@@ -484,7 +483,8 @@ SpriteActor *tank_sprite_init(const SpritePosition *position, bool include_drive
     actor->dies_upon_stomp = false;
     actor->touch_hurts_hero = false;
     actor->stompable = false;
-    actor->immune_to_missiles = true;
+    actor->immune_to_projectiles = true;
+    actor->interacts_with_sprites = false;
 
     static const SpriteBoundingBox sprite_box = {
         .offset = { -12, -16 },

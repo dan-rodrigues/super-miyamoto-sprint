@@ -35,7 +35,7 @@ SpriteActor *tank_driver_sprite_init(const SpritePosition *position) {
 
     static const SpriteBoundingBox sprite_box = {
         .offset = { -6, -12 },
-        .size = { 12, 12 }
+        .size = { 12, 16 }
     };
     actor->bounding_box = sprite_box;
 
