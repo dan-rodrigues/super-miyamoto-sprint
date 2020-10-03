@@ -138,6 +138,9 @@ SpriteActor *platform_sprite_init(const SpritePosition *position, PlatformSprite
     sa_init(actor, platform_sprite_main);
     actor->position = *position;
 
+    // Need to review how vertical positions are offset in sprite defs
+    actor->position.y--;
+
     actor->rideable = true;
     actor->interacts_with_sprites = false;
 
@@ -169,8 +172,8 @@ static void test_movement(SpriteActor *self, const PadInputDecoded *pad) {
 // (TODO: configurable length)
 static const SpriteBoundingBox *interaction_box(const SpriteActor *actor) {
     static const SpriteBoundingBox box = {
-        .size = { 16 * 5, 17 },
-        .offset = { -16, -17 }
+        .size = { 16 * 5, 16 },
+        .offset = { -16, -16 }
     };
 
     return &box;

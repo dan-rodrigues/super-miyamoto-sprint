@@ -19,6 +19,8 @@
 #include "tank_driver_sprite.h"
 #include "spark_sprite.h"
 #include "moving_smoke_sprite.h"
+#include "jumping_enemy_sprite.h"
+#include "jetpack_enemy_sprite.h"
 
 #define SPRITE_ACTOR_MAX 32
 #define SPRITE_ACTOR_LIGHT_MAX 48
@@ -48,6 +50,7 @@ struct SpriteActor {
     bool immune_to_projectiles;
 
     bool thud_sound_upon_hitting_wall;
+    bool invert_velocity_upon_hitting_wall;
     
     // This can be considered duplicate state if there's only ever 1 hero
     // In this case the hero should be the source of truth
@@ -72,6 +75,8 @@ struct SpriteActor {
         BallEnemy ball_enemy;
         TankSprite tank;
         TankDriverSprite tank_driver;
+        JumpingEnemySprite jumping_enemy;
+        JetpackEnemySprite jetpack_enemy;
         // ...
     };
 };

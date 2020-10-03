@@ -28,12 +28,15 @@ void sa_apply_velocity(const SpriteVelocity *velocity, SpritePosition *position)
     position->y_full += velocity->y;
 }
 
-void sa_apply_velocity_with_gravity(SpriteActor *actor, const SpriteBoundingBox *box) {
+// Returns true if grounded
+bool sa_apply_velocity_with_gravity(SpriteActor *actor, const SpriteBoundingBox *box) {
     // Based on values for Hero
     const int32_t gravity_accel = Q_1 / 4;
     const int32_t fall_speed_max = 5 * Q_1;
 
     // Only apply gravity if sprite isn't on a platform
+
+    bool grounded = false;
 
     SpriteActorHandle platform_handle = actor->ridden_sprite_handle;
     if (!sa_handle_live(platform_handle)) {
@@ -42,6 +45,7 @@ void sa_apply_velocity_with_gravity(SpriteActor *actor, const SpriteBoundingBox 
     } else {
         const PlatformSprite *platform = &sa_get(platform_handle)->platform;
         sa_apply_offset(&platform->frame_offset, &actor->position);
+        grounded = true;
     }
 
     sa_apply_velocity(&actor->velocity, &actor->position);
@@ -66,7 +70,10 @@ void sa_apply_velocity_with_gravity(SpriteActor *actor, const SpriteBoundingBox 
         actor->position.y_fraction = 0;
 
         sa_grounded_update(actor, displacement);
+        grounded = true;
     }
+
+    return grounded;
 }
 
 void sa_grounded_update(SpriteActor *actor, int32_t displacement) {
@@ -128,7 +135,7 @@ void sa_apply_horizontal_block_interaction_updates(SpriteActor *actor,
         mirror_x_velocity = (actor->velocity.x < 0);
     }
 
-    if (mirror_x_velocity) {
+    if (actor->invert_velocity_upon_hitting_wall && mirror_x_velocity) {
         actor->velocity.x = -actor->velocity.x;
         if (actor->thud_sound_upon_hitting_wall) {
             se_thud();
@@ -288,4 +295,12 @@ static bool onscreen(int32_t screen_x,
 
 int32_t sa_velocity_from_speed(int32_t speed, SpriteDirection direction) {
     return (direction == LEFT ? -speed : speed);
+}
+
+SpriteDirection sa_direction_facing_hero(const SpriteActor *actor, const Hero *hero) {
+    return (actor->position.x < hero->position.x ? RIGHT : LEFT);
+}
+
+bool sa_above_hero(const SpriteActor *actor, const Hero *hero) {
+    return (actor->position.y < hero->position.y - 24);
 }

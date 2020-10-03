@@ -44,6 +44,8 @@ SOURCES = \
 	sprites/actors/tank_driver_sprite.c \
 	sprites/actors/missile_sprite.c \
 	sprites/actors/spark_sprite.c \
+	sprites/actors/jumping_enemy_sprite.c \
+	sprites/actors/jetpack_enemy_sprite.c \
 	tasks/extra_task.c \
 	tasks/extra_task_handle.c \
 	tasks/level_reload_sequence_task.c \

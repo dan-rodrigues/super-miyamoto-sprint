@@ -46,6 +46,7 @@ void sa_init(SpriteActor *actor, SpriteActorMain main) {
     actor->touch_hurts_hero = true;
     actor->stompable = true;
     actor->thud_sound_upon_hitting_wall = false;
+    actor->invert_velocity_upon_hitting_wall = true;
     actor->immune_to_projectiles = false;
 
     actor->position.x_full = 0;
