@@ -45,7 +45,7 @@ struct SpriteActor {
     bool dies_upon_stomp;
     bool falls_off_when_killed;
     bool kills_other_sprites;
-    bool immune_to_missiles;
+    bool immune_to_projectiles;
 
     bool thud_sound_upon_hitting_wall;
     

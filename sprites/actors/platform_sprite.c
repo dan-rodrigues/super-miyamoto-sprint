@@ -169,8 +169,8 @@ static void test_movement(SpriteActor *self, const PadInputDecoded *pad) {
 // (TODO: configurable length)
 static const SpriteBoundingBox *interaction_box(const SpriteActor *actor) {
     static const SpriteBoundingBox box = {
-        .size = { 16 * 5, 16 },
-        .offset = { -16, -16 }
+        .size = { 16 * 5, 17 },
+        .offset = { -16, -17 }
     };
 
     return &box;
