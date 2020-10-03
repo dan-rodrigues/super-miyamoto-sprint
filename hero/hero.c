@@ -468,9 +468,12 @@ static void handle_damage(Hero *hero) {
     } else {
         // Hero is dead (or dieing)
 
-        const uint8_t death_freeze_duration = 20;
+        const uint8_t death_freeze_duration = 24;
         hero->death_timer = death_freeze_duration;
         hero->dead = true;
+
+        // Fade hero palette to white, except for outline colors
+        palette_lerp_task_init(8, ~0x000a);
 
         sa_handle_clear(&hero->carried_sprite_handle);
         sa_handle_clear(&hero->vehicle_sprite_handle);
@@ -500,12 +503,17 @@ static void horizontal_block_displacement(Hero *hero, const SpriteBlockInteracti
 }
 
 const SpriteBoundingBox *hero_sprite_bounding_box(const Hero *hero) {
-    static const SpriteBoundingBox hero_box = {
-        .offset = { -8, -20},
-        .size = { 12, 20}
+    static const SpriteBoundingBox standing_box = {
+        .offset = { -8, -24},
+        .size = { 12, 24}
     };
 
-    return &hero_box;
+    static const SpriteBoundingBox ducking_box = {
+        .offset = { -8, -16},
+        .size = { 12, 16}
+    };
+
+    return (hero->ducking ? &ducking_box : &standing_box);
 }
 
 static const SpriteBoundingBox *block_horizontal_bounding_box(const Hero *hero) {
@@ -918,10 +926,6 @@ static void draw_death_decoration(const Hero *hero) {
 static bool liveness_check(Hero *hero) {
     if (!hero->dead) {
         return true;
-    }
-
-    if (hero->death_timer == 0x10) {
-        palette_lerp_task_init(8, ~0x000a);
     }
 
     bool hero_explodes = false;

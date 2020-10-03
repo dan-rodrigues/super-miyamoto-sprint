@@ -54,9 +54,11 @@ struct SpriteBoundingBoxAbs {
 };
 
 SpriteDirection sa_direction_flipped(SpriteDirection direction);
+SpriteDirection sa_direction_facing_hero(const SpriteActor *actor, const Hero *hero);
+bool sa_above_hero(const SpriteActor *actor, const Hero *hero);
 
 void sa_apply_velocity(const SpriteVelocity *velocity, SpritePosition *position);
-void sa_apply_velocity_with_gravity(SpriteActor *actor, const SpriteBoundingBox *box);
+bool sa_apply_velocity_with_gravity(SpriteActor *actor, const SpriteBoundingBox *box);
 void sa_apply_horizontal_block_interaction_updates(SpriteActor *actor, const SpriteBoundingBox *box);
 
 bool sa_perform_default_movement(SpriteActor *actor);

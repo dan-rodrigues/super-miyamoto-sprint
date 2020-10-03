@@ -382,9 +382,9 @@ static void enemy_driver_update(SpriteActor *self, TankSprite *sub, const Hero *
 static void position_driver(SpriteActor *self, TankSprite *sub) {
     SpriteActor *driver = sa_get(sub->driver_enemy_handle);
 
-    const SpriteOffset driver_offset = { 0, -18 };
+    const SpriteOffset driver_offset = { 3, -18 };
     driver->position = self->position;
-    sa_apply_offset(&driver_offset, &driver->position);
+    sa_apply_offset_flip(&driver_offset, &driver->position, self->direction);
 
     driver->direction = self->direction;
 }

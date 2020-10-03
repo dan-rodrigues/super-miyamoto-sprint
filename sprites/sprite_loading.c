@@ -199,7 +199,9 @@ typedef enum {
     SPRITE_ID_BALL = 0xdb,
     SPRITE_ID_PLATFORM_X = 0x5b,
     SPRITE_ID_PLATFORM_Y = 0xc4,
-    SPRITE_ID_TANK = 0x1c
+    SPRITE_ID_TANK = 0x1c,
+    SPRITE_ID_JUMPER = 0x05,
+    SPRITE_ID_JETPACK = 0x0a
 } SpriteID;
 
 static SpriteActor *sprite_factory(const SpriteLevelEncoded *sprite, const SpritePosition *position) {
@@ -208,10 +210,14 @@ static SpriteActor *sprite_factory(const SpriteLevelEncoded *sprite, const Sprit
             return basic_enemy_sprite_init(position, false);
         case SPRITE_ID_BASIC_SPIKED:
             return basic_enemy_sprite_init(position, true);
+        case SPRITE_ID_JETPACK:
+            return jetpack_enemy_sprite_init(position);
         case SPRITE_ID_BALL_CURLED:
             return ball_enemy_sprite_init(position, false);
         case SPRITE_ID_BALL:
             return ball_enemy_sprite_init(position, true);
+        case SPRITE_ID_JUMPER:
+            return jumping_enemy_sprite_init(position);
         case SPRITE_ID_PLATFORM_X:
             return platform_sprite_init(position, PLATFORM_MOTION_AUTO_X);
         case SPRITE_ID_PLATFORM_Y:
