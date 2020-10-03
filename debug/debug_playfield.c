@@ -40,7 +40,7 @@ void dbg_init_playfield(GameContext *context) {
 
     context->paused = false;
 
-    const bool skip_fade_in = false;
+    const bool skip_fade_in = true;
 
     if (!skip_fade_in) {
         fade_task_init(FADE_IN);

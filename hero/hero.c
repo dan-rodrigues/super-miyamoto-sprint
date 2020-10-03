@@ -4,14 +4,15 @@
 
 #include "math_util.h"
 #include "assert.h"
-#include "sound_effects.h"
 
+#include "sound_effects.h"
 #include "smoke_sprite.h"
 #include "sprite_block_interaction.h"
 #include "sprite_collision.h"
 #include "debug_print.h"
 #include "hero_life_meter.h"
 #include "level_reload_sequence_task.h"
+#include "palette_lerp_task.h"
 
 const HeroFrame HERO_IDLE_FRAME = HF_RUN2;
 
@@ -467,7 +468,7 @@ static void handle_damage(Hero *hero) {
     } else {
         // Hero is dead (or dieing)
 
-        const uint8_t death_freeze_duration = 30;
+        const uint8_t death_freeze_duration = 20;
         hero->death_timer = death_freeze_duration;
         hero->dead = true;
 
@@ -913,9 +914,14 @@ static void draw_death_decoration(const Hero *hero) {
     }
 }
 
+
 static bool liveness_check(Hero *hero) {
     if (!hero->dead) {
         return true;
+    }
+
+    if (hero->death_timer == 0x10) {
+        palette_lerp_task_init(8, ~0x000a);
     }
 
     bool hero_explodes = false;
