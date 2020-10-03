@@ -286,13 +286,13 @@ static void move(SpriteActor *self) {
     }
 
     static const SpriteBoundingBox horizontal_box = {
-        .offset = { -5, -10 },
-        .size = { 12, 6 }
+        .offset = { -11, -12 },
+        .size = { 23, 8 }
     };
 
     static const SpriteBoundingBox vertical_box = {
-        .offset = { -4, -13 },
-        .size = { 4 + 3, 13 }
+        .offset = { -8, -16 },
+        .size = { 16, 16 }
     };
 
     sa_apply_velocity_with_gravity(self, &vertical_box);

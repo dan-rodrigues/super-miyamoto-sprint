@@ -46,6 +46,8 @@ SOURCES = \
 	sprites/actors/spark_sprite.c \
 	sprites/actors/jumping_enemy_sprite.c \
 	sprites/actors/jetpack_enemy_sprite.c \
+	sprites/actors/goal_sprite.c \
+	sprites/actors/midpoint_sprite.c \
 	tasks/extra_task.c \
 	tasks/extra_task_handle.c \
 	tasks/level_reload_sequence_task.c \
@@ -61,7 +63,6 @@ SOURCES = \
 	vram/vram_layout.c \
 	vram/vram_animated_tiles.c \
 	vram/vram_address.c \
-	palette/palette_init.c \
 	palette/palette_buffer.c \
 	audio/music.c \
 	audio/sound_effects.c \
@@ -86,6 +87,7 @@ SOURCES += $(addprefix $(ICS32_SW_DIR)common/, \
 
 CPU_SLOW_SOURCES := \
 	debug/debug_custom_assert.c \
+	palette/palette_init.c \
 	level/level_loading.c
 
 CPU_SLOW_SOURCES += $(addprefix $(ICS32_SW_DIR)common/, \

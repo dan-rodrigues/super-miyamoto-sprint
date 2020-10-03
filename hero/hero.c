@@ -57,9 +57,13 @@ static void iterate_block_interaction(Hero *hero,
 
 static bool liveness_check(Hero *hero);
 static void draw_death_decoration(const Hero *hero);
+static void bounds_death_check(Hero *hero);
+static void start_death_sequence(void);
 
 void hero_update_state(Hero *hero, const Camera *camera) {
     const PadInputDecoded *pad = &hero->pad;
+
+    bounds_death_check(hero);
 
     if (!liveness_check(hero)) {
         // Hero can't be controlled by player if dieing
@@ -906,6 +910,8 @@ static void collect_coin(Hero *hero,
     se_coin();
 }
 
+// Death handling:
+
 static void draw_death_decoration(const Hero *hero) {
     static const SpriteOffset smoke_offsets[] = {
         { -16, -24 }, { 16, -24 },
@@ -937,10 +943,41 @@ static bool liveness_check(Hero *hero) {
         hero->visible = false;
 
         draw_death_decoration(hero);
-
         se_hero_dead();
-        level_reload_sequence_task_init();
+
+        start_death_sequence();
     }
 
     return false;
+}
+
+static void bounds_death_check(Hero *hero) {
+    if (hero->dead) {
+        return;
+    }
+
+    const int16_t kill_bound = 0x1c8;
+    if (hero->position.y < kill_bound) {
+        return;
+    }
+
+    // Hero fell off the bottom of screen and dies instantly
+
+    hero->dead = true;
+    hero->life = 0;
+    hero->visible = false;
+    se_hero_dead();
+
+    start_death_sequence();
+}
+
+static void start_death_sequence() {
+    const uint8_t death_fade_delay = 20;
+    level_reload_sequence_task_init(death_fade_delay);
+}
+
+// Midpoint:
+
+void hero_mark_midpoint_reached(Hero *hero) {
+    hero->midpoint_reached = true;
 }

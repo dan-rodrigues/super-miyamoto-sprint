@@ -18,35 +18,11 @@
 #include "sprite_text.h"
 #include "fade_task.h"
 #include "palette_buffer.h"
+#include "extra_task.h"
 
 void dbg_init_playfield(GameContext *context) {
-    // Disable the display while preparing the level / display
-    vdp_set_alpha_over_layers(0);
-    vdp_enable_layers(0);
-    vdp_set_single_palette_color(0, 0x0000);
-
-    const PlayerContext *p1 = &context->players[0];
-
-    // Initialization:
-
     const LevelAttributes *attributes = level_attributes(0);
-    level_load(attributes);
-
-    hero_level_init(p1->hero, attributes);
-    camera_init(p1->camera, p1->hero, block_map_table);
-    sprite_level_data_perform_initial_load(p1->camera, p1->hero);
-
-    dbg_print_init();
-
-    context->paused = false;
-
-    const bool skip_fade_in = false;
-
-    if (!skip_fade_in) {
-        fade_task_init(FADE_IN);
-    } else {
-        pb_alpha_mask_all(0xf);
-    }
+    level_init(attributes, context);
 }
 
 void dbg_reset_sprites(Hero *hero) {
@@ -82,18 +58,13 @@ void dbg_print_sandbox_instructions() {
     st_write(line_2, base_x, base_y + 18);
 }
 
-GameLoopAction dbg_frame_action(GameContext *context) {
+void dbg_frame_action(GameContext *context) {
     const PadInputDecoded *p1_pad_edge = &context->players[0].hero->pad_edge;
 
     // Select: reset game world
-    if (p1_pad_edge->select) {
-        return GL_ACTION_RESET_WORLD;
+    if (p1_pad_edge->select && !context->resetting) {
+        context->resetting = true;
+        ExtraTask *reload_task = level_reload_sequence_task_init(0);
+        reload_task->level_reload_sequence.final_action = GL_ACTION_RESET_WORLD;
     }
-
-    // X button: spawn sprites
-//    if (p1_pad_edge->x) {
-//        return GL_ACTION_SPAWN_SPRITES;
-//    }
-
-    return GL_ACTION_NONE;
 }

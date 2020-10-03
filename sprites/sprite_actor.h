@@ -21,6 +21,8 @@
 #include "moving_smoke_sprite.h"
 #include "jumping_enemy_sprite.h"
 #include "jetpack_enemy_sprite.h"
+#include "goal_sprite.h"
+#include "midpoint_sprite.h"
 
 #define SPRITE_ACTOR_MAX 32
 #define SPRITE_ACTOR_LIGHT_MAX 48
@@ -77,6 +79,8 @@ struct SpriteActor {
         TankDriverSprite tank_driver;
         JumpingEnemySprite jumping_enemy;
         JetpackEnemySprite jetpack_enemy;
+        GoalSprite goal;
+        MidpointSprite midpoint;
         // ...
     };
 };

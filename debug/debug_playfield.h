@@ -6,7 +6,7 @@
 #include "camera_types.h"
 
 void dbg_init_playfield(GameContext *context);
-GameLoopAction dbg_frame_action(GameContext *context);
+void dbg_frame_action(GameContext *context);
 
 void dbg_reset_sprites(Hero *hero);
 void dbg_spawn_platform(const Hero *hero);
