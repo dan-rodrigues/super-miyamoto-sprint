@@ -2,12 +2,18 @@
 
 #include "hero.h"
 
-void hero_level_init(Hero *hero, const LevelAttributes *attributes) {
+void hero_level_init(Hero *hero,
+                     const LevelAttributes *attributes,
+                     uint8_t max_life,
+                     bool midpoint_position)
+{
     static const Hero hero_initialized = {
         .life = 0,
-        .life_max = 0,
+        .max_life = 0,
         .death_timer = 0,
         .dead = false,
+
+        .midpoint_reached = false,
 
         .coins = 0,
         .invulnerability_counter = 0,
@@ -49,16 +55,20 @@ void hero_level_init(Hero *hero, const LevelAttributes *attributes) {
 
     *hero = hero_initialized;
 
+    const LevelPosition *initial_position = midpoint_position
+        ? &attributes->mid_position : &attributes->start_position;
+
     SpritePosition hero_position = {
-        .x = attributes->start_position.x,
-        .y = attributes->start_position.y,
+        .x = initial_position->x,
+        .y = initial_position->y,
         .x_fraction = 0,
         .y_fraction = 0
     };
     hero->position = hero_position;
 
-    hero->life = HERO_DEFAULT_LIFE;
-    hero->life_max = HERO_DEFAULT_LIFE;
+    hero->life = max_life;
+    hero->max_life = max_life;
+    hero->midpoint_reached = midpoint_position;
 
     hero->frame = HERO_IDLE_FRAME;
     hero->platform_sprite_handle = SA_HANDLE_FREE;

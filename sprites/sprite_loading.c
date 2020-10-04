@@ -201,7 +201,9 @@ typedef enum {
     SPRITE_ID_PLATFORM_Y = 0xc4,
     SPRITE_ID_TANK = 0x1c,
     SPRITE_ID_JUMPER = 0x05,
-    SPRITE_ID_JETPACK = 0x0a
+    SPRITE_ID_JETPACK = 0x0a,
+    SPRITE_ID_GOAL = 0x2c,
+    SPRITE_ID_MIDPOINT = 0x7b
 } SpriteID;
 
 static SpriteActor *sprite_factory(const SpriteLevelEncoded *sprite, const SpritePosition *position) {
@@ -224,6 +226,10 @@ static SpriteActor *sprite_factory(const SpriteLevelEncoded *sprite, const Sprit
             return platform_sprite_init(position, PLATFORM_MOTION_AUTO_Y);
         case SPRITE_ID_TANK:
             return tank_sprite_init(position, true);
+        case SPRITE_ID_GOAL:
+            return goal_sprite_init(position);
+        case SPRITE_ID_MIDPOINT:
+            return midpoint_sprite_init(position);
         case SPRITE_ID_LAYERED: default:
             return layered_enemy_sprite_init(position);
     }

@@ -12,6 +12,7 @@ typedef enum {
 
 typedef struct {
     uint8_t fade_step;
+    uint8_t fade_delta;
     FadeTaskType type;
 } FadeTask;
 

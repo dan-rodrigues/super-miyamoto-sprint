@@ -43,6 +43,8 @@ void *memcpy(void *s1, const void *s2, size_t n) {
 __attribute__ ((used))
 __attribute__((optimize("-fno-strict-aliasing")))
 void *memset(void *dest, int val, size_t len) {
+    val &= 0xff;
+    
     // 32bit aligned part
 
     uint32_t *dest_32 = dest;

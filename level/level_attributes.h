@@ -10,6 +10,7 @@ typedef struct {
 
 typedef struct {
     LevelPosition start_position;
+    LevelPosition mid_position;
 
     uint16_t stride;
     const uint16_t *block_data;

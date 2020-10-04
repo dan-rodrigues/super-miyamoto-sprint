@@ -55,6 +55,8 @@ struct Hero {
     int32_t frame_counter;
     uint8_t animation_counter;
 
+    bool midpoint_reached;
+    
     uint8_t coins;
 
     PadInputDecoded pad, pad_edge;
@@ -78,7 +80,7 @@ struct Hero {
     bool damage_causes_hop;
 
     uint8_t life;
-    uint8_t life_max;
+    uint8_t max_life;
     uint8_t death_timer;
     bool dead;
     
@@ -167,5 +169,7 @@ void hero_enter_vehicle(Hero *hero, SpriteActor *actor);
 bool hero_in_vehicle(const Hero *hero, const SpriteActor *actor);
 bool hero_in_any_vehicle(const Hero *hero);
 bool hero_vehicle_control_state(const Hero *hero, HeroVehicleControl *control);
+
+void hero_mark_midpoint_reached(Hero *hero);
 
 #endif /* hero_h */

@@ -15,6 +15,9 @@
 #include "vram_animated_tiles.h"
 #include "global_timers.h"
 #include "extra_task.h"
+#include "camera_init.h"
+#include "hero_init.h"
+#include "block_map_table.h"
 
 #include "bg_hills_no_clouds.h"
 #include "bg_hills_clouds.h"
@@ -26,6 +29,28 @@
 #include "spr02_tiles.h"
 #include "spr04_tiles.h"
 #include "spr06_07_tiles.h"
+
+void level_init(const LevelAttributes *attributes, GameContext *context) {
+    const PlayerContext *p1 = &context->players[0];
+
+    level_load(attributes);
+
+    hero_level_init(p1->hero, attributes, p1->max_life, p1->midpoint_reached);
+    camera_init(p1->camera, p1->hero, block_map_table);
+    sprite_level_data_perform_initial_load(p1->camera, p1->hero);
+
+    dbg_print_init();
+
+    context->paused = false;
+
+    const bool skip_fade_in = false;
+
+    if (!skip_fade_in) {
+        fade_task_init(FADE_IN);
+    } else {
+        pb_alpha_mask_all(0xf, true);
+    }
+}
 
 void level_load(const LevelAttributes *attributes) {
     sb_reset();

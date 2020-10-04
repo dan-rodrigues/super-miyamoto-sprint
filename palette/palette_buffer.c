@@ -28,26 +28,28 @@ void pb_preload_single_color(uint8_t color_id, uint16_t color) {
 
 void pb_preload_bg_color(uint16_t color) {
     pb_preload_single_color(0, color);
+    bg_color_needs_upload = true;
 }
 
-void pb_queue_all() {
+void pb_queue_all(bool including_bg_color) {
     memset(palette_needs_upload, true, sizeof(palette_needs_upload));
-    bg_color_needs_upload = true;
+    bg_color_needs_upload |= including_bg_color;
 }
 
 void pb_queue_palette(uint8_t palette_id) {
     palette_needs_upload[palette_id] = true;
 }
 
-void pb_alpha_mask_all(uint8_t alpha) {
+void pb_alpha_mask_all(uint8_t alpha, bool including_bg_color) {
     uint16_t alpha_mask = alpha << 12;
 
-    for (uint32_t i = 0; i < PALETTE_COUNT * PALETTE_SIZE; i++) {
+    uint32_t base_index = (including_bg_color ? 0 : 1);
+    for (uint32_t i = base_index; i < PALETTE_COUNT * PALETTE_SIZE; i++) {
         palette_modified[i] = (palette_preloaded[i] & 0x0fff) | alpha_mask;
     }
 
     use_modified_palette = true;
-    pb_queue_all();
+    pb_queue_all(including_bg_color);
 }
 
 static uint8_t lerp_channel(uint8_t from, uint8_t to, uint8_t step) {

@@ -59,7 +59,5 @@ void palette_init(const LevelAttributes *attributes) {
 
     const uint16_t background_color = 0xf488;
     pb_preload_bg_color(background_color);
-
-    pb_alpha_mask_all(0);
     pb_upload();
 }

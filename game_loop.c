@@ -36,7 +36,7 @@
 #include "extra_task.h"
 
 static GameLoopAction step_frame(Hero *hero, Camera *camera);
-static void enable_display(void);
+static void enable_display(bool alpha_enabled);
 
 GameLoopAction gl_run_frame(GameContext *context) {
     PlayerContext *p1 = &context->players[0];
@@ -49,16 +49,13 @@ GameLoopAction gl_run_frame(GameContext *context) {
     pad_decode_input(hero->pad.raw, &hero->pad);
     pad_decode_input(hero->pad_edge.raw, &hero->pad_edge);
 
-    GameLoopAction debug_action = dbg_frame_action(context);
-    if (debug_action) {
-        return debug_action;
-    }
+    dbg_frame_action(context);
 
     if (hero->pad_edge.start) {
         context->paused = !context->paused;
 
         uint8_t alpha = context->paused ? 0x8 : 0xf;
-        pb_alpha_mask_all(alpha);
+        pb_alpha_mask_all(alpha, true);
     }
 
     // (later: copper updates if applicable)
@@ -89,8 +86,12 @@ GameLoopAction gl_run_frame(GameContext *context) {
 
     // Only enable display after all the above attributes have been set
     // This adds 1 extra frame of disabled display after loading a level too
-    enable_display();
+    enable_display(!context->paused);
 
+    // Save the bits of hero state that need to persist between level loads
+    p1->midpoint_reached = hero->midpoint_reached;
+    p1->max_life = hero->max_life;
+    
     return result_action;
 }
 
@@ -141,7 +142,30 @@ static GameLoopAction step_frame(Hero *hero, Camera *camera) {
     return task_result_action;
 }
 
-static void enable_display() {
+void gl_reset_context(GameContext *context, Hero *hero, Camera *camera) {
+    const GameContext context_initialized = {
+        .players = {
+            {
+                // P1
+                .hero = hero,
+                .camera = camera,
+                .active = true,
+                .midpoint_reached = false,
+                .max_life = HERO_DEFAULT_LIFE
+            },
+            {
+                // P2 (only single player for now)
+                .active = false
+            }
+        },
+        .paused = false,
+        .resetting = false
+    };
+
+    *context = context_initialized;
+}
+
+static void enable_display(bool alpha_enabled) {
     VDPLayer visible_layers = SCROLL0 | SCROLL1 | SCROLL2 | SPRITES;
 
     #ifdef DEBUG_PRINT
@@ -150,4 +174,5 @@ static void enable_display() {
 
     // Enable display now that level / display are prepared
     vdp_enable_layers(visible_layers);
+    vdp_set_alpha_over_layers(alpha_enabled ? visible_layers : 0);
 }

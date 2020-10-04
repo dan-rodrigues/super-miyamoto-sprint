@@ -21,7 +21,7 @@ static const uint16_t BLOCK_ID_CLEAR = 0x025;
 
 static uint16_t current_stride;
 // Temporarily fixing height
-static const uint16_t current_height = 0x1e0 / 0x10;
+static const uint16_t current_height = 0x1b0 / 0x10;
 
 static uint16_t current_level[LEVEL_BLOCKS_MAX];
 
@@ -83,11 +83,6 @@ void erase_block(uint32_t x, uint32_t y, const Camera *camera) {
                     block_map_table[index + 1],
                     block_map_table[index + 3]);
 }
-
-typedef struct {
-    uint16_t block;
-    BlockInteractionAttributes attributes;
-} BlockInteractionAttributeTuple;
 
 BlockInteractionAttributes block_get_attributes(uint16_t block) {
     return block_attributes[block];
