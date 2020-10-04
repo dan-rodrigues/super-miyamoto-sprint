@@ -115,7 +115,12 @@ static void update_left_scroll(int32_t new_scroll, const Hero *hero) {
             next_left_index--;
         }
     } else {
-        while (sprite_data_base[++next_left_index].x <= new_scroll) {}
+        while (sprite_data_base[next_left_index++].x <= new_scroll) {
+            if (next_left_index == total_sprite_count) {
+                break;
+            }
+        }
+
         next_left_index--;
     }
 
@@ -139,7 +144,11 @@ static void update_right_scroll(int32_t new_scroll, const Hero *hero) {
             next_right_index++;
         }
     } else {
-        while (sprite_data_base[--next_right_index].x > new_scroll) {}
+        while (sprite_data_base[next_right_index--].x > new_scroll) {
+            if (!next_right_index < 0) {
+                break;
+            }
+        }
         next_right_index++;
     }
 
