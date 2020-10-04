@@ -40,16 +40,25 @@ void pb_queue_palette(uint8_t palette_id) {
     palette_needs_upload[palette_id] = true;
 }
 
-void pb_alpha_mask_all(uint8_t alpha, bool including_bg_color) {
+void pb_alpha_mask_palette(uint8_t palette_id, uint8_t alpha, bool including_bg_color) {
     uint16_t alpha_mask = alpha << 12;
+    uint32_t color_id_base = (including_bg_color ? 0 : 1);
+    uint32_t palette_base = palette_id * 16;
 
-    uint32_t base_index = (including_bg_color ? 0 : 1);
-    for (uint32_t i = base_index; i < PALETTE_COUNT * PALETTE_SIZE; i++) {
-        palette_modified[i] = (palette_preloaded[i] & 0x0fff) | alpha_mask;
+    for (uint32_t i = color_id_base; i < PALETTE_SIZE; i++) {
+        uint16_t color = (palette_preloaded[palette_base + i] & 0x0fff) | alpha_mask;
+        palette_modified[palette_base + i] = color;
     }
 
+    palette_needs_upload[palette_id] = true;
+    bg_color_needs_upload |= ((palette_id == 0) && including_bg_color);
     use_modified_palette = true;
-    pb_queue_all(including_bg_color);
+}
+
+void pb_alpha_mask_all(uint8_t alpha, bool including_bg_color) {
+    for (uint32_t i = 0; i < PALETTE_COUNT; i++) {
+        pb_alpha_mask_palette(i, alpha, including_bg_color);
+    }
 }
 
 static uint8_t lerp_channel(uint8_t from, uint8_t to, uint8_t step) {
