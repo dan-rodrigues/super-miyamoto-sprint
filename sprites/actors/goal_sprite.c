@@ -40,6 +40,8 @@ SpriteActor *goal_sprite_init(const SpritePosition *position) {
     actor->bounding_box = sprite_box;
     actor->stompable = false;
     actor->touch_hurts_hero = false;
+    actor->interacts_with_sprites = false;
+    actor->immune_to_projectiles = true;
 
     return actor;
 }
