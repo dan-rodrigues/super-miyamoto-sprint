@@ -35,6 +35,20 @@ void et_free(ExtraTask *task) {
     task->handle.generation++;
 }
 
+ExtraTask *et_index(uint8_t index) {
+    ExtraTask *task = &tasks[index];
+    return (et_live(task) ? task : NULL);
+}
+
+void et_cancel(ExtraTaskHandle handle) {
+    ExtraTask *task = et_index(handle.index);
+    if (!task) {
+        return;
+    }
+
+    et_free(task);
+}
+
 GameLoopAction et_run() {
     GameLoopAction action = GL_ACTION_NONE;
 
@@ -59,4 +73,18 @@ GameLoopAction et_run() {
 
 bool et_live(const ExtraTask *task) {
     return (task->handle.index != ET_UNDEFINED);
+}
+
+bool et_handle_live(ExtraTaskHandle handle) {
+    uint8_t index = handle.index;
+    if (index == ET_UNDEFINED) {
+        return false;
+    }
+
+    const ExtraTask *task = &tasks[index];
+    if (task->handle.index == ET_UNDEFINED) {
+        return false;
+    }
+
+    return (tasks[index].handle.generation == handle.generation);
 }

@@ -12,8 +12,11 @@ void hero_level_init(Hero *hero,
         .max_life = 0,
         .death_timer = 0,
         .dead = false,
+        .death_sequence_complete = false,
+        .visible = true,
 
         .midpoint_reached = false,
+        .goal_reached = false,
 
         .coins = 0,
         .invulnerability_counter = 0,
@@ -23,8 +26,9 @@ void hero_level_init(Hero *hero,
         
         .frame = HF_RUN0,
         .uploaded_frame = HF_UNDEFINED,
+        .uploaded_transluscent_palette = false,
         .frame_counter = 0,
-        .visible = true,
+        .transluscent = true,
 
         .grounded = false,
         .quick_turning = false,

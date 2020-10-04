@@ -10,8 +10,16 @@
 #include "miyamoto_tiles.h"
 #include "vram_command_queue.h"
 #include "vram_layout.h"
+#include "palette_buffer.h"
 
 void hero_draw(Hero *hero, int16_t sprite_tile, Camera *camera) {
+    if (hero->transluscent != hero->uploaded_transluscent_palette) {
+        uint8_t alpha = (hero->transluscent ? 0x8 : 0xf);
+        pb_alpha_mask_palette(8, alpha, false);
+
+        hero->uploaded_transluscent_palette = hero->transluscent;
+    }
+
     if (!hero->visible) {
         return;
     }

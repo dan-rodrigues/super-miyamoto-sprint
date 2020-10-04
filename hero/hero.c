@@ -58,7 +58,6 @@ static void iterate_block_interaction(Hero *hero,
 static bool liveness_check(Hero *hero);
 static void draw_death_decoration(const Hero *hero);
 static void bounds_death_check(Hero *hero);
-static void start_death_sequence(void);
 
 void hero_update_state(Hero *hero, const Camera *camera) {
     const PadInputDecoded *pad = &hero->pad;
@@ -148,9 +147,9 @@ void hero_update_state(Hero *hero, const Camera *camera) {
 
     if (hero->invulnerability_counter > 0) {
         hero->invulnerability_counter--;
-        hero->visible = hero->invulnerability_counter % 2;
+        hero->transluscent = true;
     } else {
-        hero->visible = true;
+        hero->transluscent = false;
     }
 
     // Precompute bounding box ONCE for this state update
@@ -940,12 +939,12 @@ static bool liveness_check(Hero *hero) {
     }
 
     if (hero_explodes) {
+        hero->transluscent = false;
         hero->visible = false;
+        hero->death_sequence_complete = true;
 
         draw_death_decoration(hero);
         se_hero_dead();
-
-        start_death_sequence();
     }
 
     return false;
@@ -964,20 +963,20 @@ static void bounds_death_check(Hero *hero) {
     // Hero fell off the bottom of screen and dies instantly
 
     hero->dead = true;
-    hero->life = 0;
     hero->visible = false;
+    hero->life = 0;
+    hero->transluscent = false;
+    hero->death_sequence_complete = true;
+
     se_hero_dead();
-
-    start_death_sequence();
 }
 
-static void start_death_sequence() {
-    const uint8_t death_fade_delay = 20;
-    level_reload_sequence_task_init(death_fade_delay);
-}
-
-// Midpoint:
+// Midpoint / Goal collecting:
 
 void hero_mark_midpoint_reached(Hero *hero) {
     hero->midpoint_reached = true;
+}
+
+void hero_mark_goal_reached(Hero *hero) {
+    hero->goal_reached = true;
 }
