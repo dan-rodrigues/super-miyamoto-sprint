@@ -46,8 +46,8 @@ void hero_draw_draw_coin_counter(const Hero *hero) {
 
     // Digits
 
-    st_write("x", x + 16, y + 6);
-    st_write_decimal(hero->coins, x + 24, y + 6);
+    st_write("x", x + 16, y + 3);
+    st_write_decimal(hero->coins, x + 25, y + 3);
 }
 
 static void draw_heart(uint32_t x, uint32_t y, bool filled) {
