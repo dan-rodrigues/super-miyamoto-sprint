@@ -145,7 +145,7 @@ static void update_right_scroll(int32_t new_scroll, const Hero *hero) {
         }
     } else {
         while (sprite_data_base[next_right_index--].x > new_scroll) {
-            if (!next_right_index < 0) {
+            if (next_right_index < 0) {
                 break;
             }
         }
