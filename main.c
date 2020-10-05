@@ -11,20 +11,20 @@
 #include "assert.h"
 
 #include "game_loop.h"
-
+#include "affine.h"
 #include "music.h"
 #include "camera.h"
 #include "camera_init.h"
 #include "level_loading.h"
-
 #include "hero.h"
-
 #include "debug_playfield.h"
 #include "debug_custom_assert.h"
+#include "fade_task.h"
 
 static void handle_gl_action(GameLoopAction action, GameContext *context);
 
 int main() {
+    vdp_enable_copper(false);
     assert_set_handler(custom_assert_handler);
 
     vdp_enable_layers(0);
@@ -36,6 +36,7 @@ int main() {
     gl_reset_context(&context, &hero, &camera);
 
     handle_gl_action(GL_ACTION_RESET_WORLD, &context);
+//    handle_gl_action(GL_ACTION_SHOW_CREDITS, &context);
 
     music_start();
     
@@ -59,8 +60,8 @@ static void handle_gl_action(GameLoopAction action, GameContext *context) {
         case GL_ACTION_RELOAD_LEVEL:
             level_init(level, context);
             break;
-        case GL_ACTION_SPAWN_SPRITES:
-            dbg_reset_sprites(p1->hero);
+        case GL_ACTION_SHOW_CREDITS:
+            gl_load_credits(level, context);
             break;
         case GL_ACTION_NONE:
             break;

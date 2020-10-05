@@ -56,7 +56,7 @@ void sb_upload() {
         do {
             vdp_write_sprite_meta(buffer_read_poiner[0],
                                   buffer_read_poiner[1],
-                                    buffer_read_poiner[2]);
+                                  buffer_read_poiner[2]);
             buffer_read_poiner += 3;
         } while (buffer_read_poiner < buffer_pointer);
     }

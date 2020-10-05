@@ -9,7 +9,6 @@
 #include "smoke_sprite.h"
 #include "basic_enemy_sprite.h"
 #include "impact_sprite.h"
-#include "enemy_generator_sprite.h"
 #include "layered_enemy_sprite.h"
 #include "platform_sprite.h"
 #include "ball_enemy_sprite.h"
@@ -65,13 +64,13 @@ struct SpriteActor {
     // Used for sprite<->light sprite collision only
     SpriteBoundingBoxAbs bounding_box_abs;
 
-    // Debug
+#ifdef DEBUG_PRINT
     const char *debug_label;
+#endif
 
     // Sprite definitions
     union {
         BasicEnemy basic_enemy;
-        EnemyGeneratorSprite enemy_generator;
         LayeredEnemy layered_enemy;
         PlatformSprite platform;
         BallEnemy ball_enemy;
@@ -121,7 +120,7 @@ struct SpriteDeferredDrawTask {
 };
 
 void sa_add_deferred_draw_task(SpriteActor *actor, SpriteDeferredDrawFunction function);
-void sa_run_deferred_draw_tasks(SpriteEnvironment *environment);
+void sa_run_deferred_draw_tasks(const SpriteEnvironment *environment);
 
 // Vehicles:
 

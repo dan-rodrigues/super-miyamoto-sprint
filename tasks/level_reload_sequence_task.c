@@ -9,9 +9,11 @@ GameLoopAction level_reload_sequence_task_main(ExtraTask *self) {
     switch (sub->state) {
         case LEVEL_RELOAD_SEQUENCE_DELAY:
             if (!(sub->delay_counter--)) {
-                ExtraTask *fade = fade_task_init(FADE_OUT);
-                fade->fade.fade_delta = 2;
-                sub->current_subtask = fade;
+                ExtraTask *task = fade_task_init(FADE_OUT);
+                FadeTask *fade = &task->fade;
+                fade->fade_delta = 2;
+                fade->palette_mask = sub->fade_palette_mask;
+                sub->current_subtask = task;
 
                 sub->state = LEVEL_RELOAD_SEQUENCE_FADE;
             }
@@ -36,6 +38,7 @@ ExtraTask *level_reload_sequence_task_init(uint16_t delay) {
     sub->state = LEVEL_RELOAD_SEQUENCE_DELAY;
     sub->delay_counter = delay;
     sub->final_action = GL_ACTION_RELOAD_LEVEL;
+    sub->fade_palette_mask = 0xffff;
 
     return task;
 }

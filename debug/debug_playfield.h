@@ -8,7 +8,6 @@
 void dbg_init_playfield(GameContext *context);
 void dbg_frame_action(GameContext *context);
 
-void dbg_reset_sprites(Hero *hero);
 void dbg_spawn_platform(const Hero *hero);
 
 void dbg_print_sandbox_instructions(void);
