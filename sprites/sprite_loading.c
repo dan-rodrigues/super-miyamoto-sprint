@@ -10,7 +10,6 @@
 #include "camera.h"
 #include "hero.h"
 #include "sprite_actor.h"
-
 #include "gcc_lib.h"
 
 // The total number of allowed sprites in any one level
@@ -20,7 +19,7 @@ const int8_t SPRITE_INDEX_UNDEFINED = -1;
 
 // The model as it is stored in flash:
 typedef struct {
-    uint16_t x, y;
+    int16_t x, y;
     uint8_t type;
 
     uint8_t padding;
@@ -115,7 +114,7 @@ static void update_left_scroll(int32_t new_scroll, const Hero *hero) {
             next_left_index--;
         }
     } else {
-        while (sprite_data_base[next_left_index++].x <= new_scroll) {
+        while (sprite_data_base[++next_left_index].x <= new_scroll) {
             if (next_left_index == total_sprite_count) {
                 break;
             }
@@ -144,7 +143,7 @@ static void update_right_scroll(int32_t new_scroll, const Hero *hero) {
             next_right_index++;
         }
     } else {
-        while (sprite_data_base[next_right_index--].x > new_scroll) {
+        while (sprite_data_base[--next_right_index].x > new_scroll) {
             if (next_right_index < 0) {
                 break;
             }
@@ -159,7 +158,6 @@ static void update_right_scroll(int32_t new_scroll, const Hero *hero) {
 // They should be slightly offscreen when they are loaded
 // This assumes the sprites are not culled within this region or they'll never appear
 
-__attribute__((optimize("-fno-strict-aliasing")))
 void sprite_level_data_load_new(const Camera *camera, const Hero *hero) {
     SpriteLoadingBounds bounds;
     loading_bounds(camera, &bounds);
@@ -192,6 +190,10 @@ static void init_sprite(const SpriteLevelEncoded *sprite, const Hero *hero, int8
     };
 
     SpriteActor *actor = sprite_factory(sprite, &position);
+    if (!actor) {
+        return;
+    }
+    
     actor->level_data_index = index;
 
     // By default, face the hero
@@ -212,7 +214,8 @@ typedef enum {
     SPRITE_ID_JUMPER = 0x05,
     SPRITE_ID_JETPACK = 0x0a,
     SPRITE_ID_GOAL = 0x2c,
-    SPRITE_ID_MIDPOINT = 0x7b
+    SPRITE_ID_MIDPOINT = 0x7b,
+    SPRITE_ID_UNDEFINED = 0xff
 } SpriteID;
 
 static SpriteActor *sprite_factory(const SpriteLevelEncoded *sprite, const SpritePosition *position) {
@@ -239,8 +242,12 @@ static SpriteActor *sprite_factory(const SpriteLevelEncoded *sprite, const Sprit
             return goal_sprite_init(position);
         case SPRITE_ID_MIDPOINT:
             return midpoint_sprite_init(position);
-        case SPRITE_ID_LAYERED: default:
+        case SPRITE_ID_LAYERED:
             return layered_enemy_sprite_init(position);
+        case SPRITE_ID_UNDEFINED:
+            return NULL;
+        default:
+            fatal_error("Unrecognized sprite ID");
     }
 }
 
