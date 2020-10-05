@@ -34,7 +34,9 @@ struct GameContext {
     ExtraTaskHandle current_fade_handle;
 };
 
-GameLoopAction gl_run_frame(GameContext *context);
 void gl_reset_context(GameContext *context, Hero *hero, Camera *camera);
+
+GameLoopAction gl_run_frame(GameContext *context);
+bool gl_fading(const GameContext *context);
 
 #endif /* game_loop_h */
