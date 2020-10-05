@@ -7,6 +7,7 @@
 #include "game_loop_types.h"
 #include "hero_types.h"
 #include "camera_types.h"
+#include "extra_task_handle.h"
 
 enum GameLoopAction {
     GL_ACTION_NONE = 0,
@@ -29,7 +30,8 @@ struct PlayerContext {
 struct GameContext {
     PlayerContext players[2];
     bool paused;
-    bool resetting;
+
+    ExtraTaskHandle current_fade_handle;
 };
 
 GameLoopAction gl_run_frame(GameContext *context);

@@ -36,7 +36,8 @@
 #include "extra_task.h"
 
 static GameLoopAction step_frame(Hero *hero, Camera *camera);
-static void enable_display(bool alpha_enabled);
+static void enable_display(bool alpha_enabled, bool alpha_enable_sprites);
+static bool fading(const GameContext *context);
 
 GameLoopAction gl_run_frame(GameContext *context) {
     PlayerContext *p1 = &context->players[0];
@@ -51,7 +52,7 @@ GameLoopAction gl_run_frame(GameContext *context) {
 
     dbg_frame_action(context);
 
-    if (hero->pad_edge.start) {
+    if (hero->pad_edge.start && !fading(context)) {
         context->paused = !context->paused;
 
         uint8_t alpha = context->paused ? 0x8 : 0xf;
@@ -69,7 +70,27 @@ GameLoopAction gl_run_frame(GameContext *context) {
         st_write_hex(VDP_CURRENT_RASTER_Y, 8, 8);
     }
 
-    // Finished entire frame worth of processing
+    // Hero died? Start a fade if needed..
+    if (hero->death_sequence_complete) {
+        // ..assuming a fade isn't already in progress
+        if (!fading(context)) {
+            const uint8_t death_fade_delay = 20;
+            ExtraTask *task = level_reload_sequence_task_init(death_fade_delay);
+            context->current_fade_handle = task->handle;
+        }
+    }
+
+    // Hero reached goal? Start end-of-level sequence..
+    if (hero->goal_reached) {
+        // TODO: same as above, for now
+        if (!fading(context)) {
+            ExtraTask *task = level_reload_sequence_task_init(0);
+            context->current_fade_handle = task->handle;
+        }
+    }
+
+    // Finished entire frame worth of processing hopefully before the cutoff line
+    // If this isn't reached before the cutoff then user will notice slowdown
     vdp_wait_frame_ended();
 
     // Palette RAM always updated even when paused (for the fade effect)
@@ -86,7 +107,7 @@ GameLoopAction gl_run_frame(GameContext *context) {
 
     // Only enable display after all the above attributes have been set
     // This adds 1 extra frame of disabled display after loading a level too
-    enable_display(!context->paused);
+    enable_display(fading(context) && !context->paused, !context->paused);
 
     // Save the bits of hero state that need to persist between level loads
     p1->midpoint_reached = hero->midpoint_reached;
@@ -159,20 +180,23 @@ void gl_reset_context(GameContext *context, Hero *hero, Camera *camera) {
             }
         },
         .paused = false,
-        .resetting = false
+
+        .current_fade_handle = ET_HANDLE_FREE
     };
 
     *context = context_initialized;
 }
 
-static void enable_display(bool alpha_enabled) {
+static void enable_display(bool alpha_enabled, bool alpha_enable_sprites) {
     VDPLayer visible_layers = SCROLL0 | SCROLL1 | SCROLL2 | SPRITES;
-
-    #ifdef DEBUG_PRINT
-        visible_layers |= SCROLL1;
-    #endif
-
-    // Enable display now that level / display are prepared
     vdp_enable_layers(visible_layers);
-    vdp_set_alpha_over_layers(alpha_enabled ? visible_layers : 0);
+
+    VDPLayer alpha_layers = (alpha_enabled ? SCROLL0 | SCROLL1 | SCROLL2 : 0);
+    alpha_layers |= (alpha_enable_sprites ? SPRITES : 0);
+
+    vdp_set_alpha_over_layers(alpha_layers);
+}
+
+static bool fading(const GameContext *context) {
+    return et_handle_live(context->current_fade_handle);
 }

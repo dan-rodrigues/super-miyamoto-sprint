@@ -62,9 +62,14 @@ void dbg_frame_action(GameContext *context) {
     const PadInputDecoded *p1_pad_edge = &context->players[0].hero->pad_edge;
 
     // Select: reset game world
-    if (p1_pad_edge->select && !context->resetting) {
-        context->resetting = true;
+    bool fading = et_handle_live(context->current_fade_handle);
+    if (p1_pad_edge->select && !fading) {
+        // Cancel any existing fade task or there'll be glitches and other side effects
+        et_cancel(context->current_fade_handle);
+
+        // Fade out and reload
         ExtraTask *reload_task = level_reload_sequence_task_init(0);
         reload_task->level_reload_sequence.final_action = GL_ACTION_RESET_WORLD;
+        context->current_fade_handle = reload_task->handle;
     }
 }

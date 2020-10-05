@@ -34,8 +34,8 @@ SpriteActor *tank_driver_sprite_init(const SpritePosition *position) {
     actor->stompable = true;
 
     static const SpriteBoundingBox sprite_box = {
-        .offset = { -6, -14 },
-        .size = { 12, 18 }
+        .offset = { -7, -14 },
+        .size = { 13, 18 }
     };
     actor->bounding_box = sprite_box;
 

@@ -56,6 +56,7 @@ struct Hero {
     uint8_t animation_counter;
 
     bool midpoint_reached;
+    bool goal_reached;
     
     uint8_t coins;
 
@@ -83,8 +84,11 @@ struct Hero {
     uint8_t max_life;
     uint8_t death_timer;
     bool dead;
+    bool death_sequence_complete;
     
     uint8_t invulnerability_counter;
+    bool transluscent;
+    bool uploaded_transluscent_palette;
     bool visible;
 
     SpritePosition position;
@@ -171,5 +175,6 @@ bool hero_in_any_vehicle(const Hero *hero);
 bool hero_vehicle_control_state(const Hero *hero, HeroVehicleControl *control);
 
 void hero_mark_midpoint_reached(Hero *hero);
+void hero_mark_goal_reached(Hero *hero);
 
 #endif /* hero_h */

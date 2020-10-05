@@ -41,15 +41,17 @@ void level_init(const LevelAttributes *attributes, GameContext *context) {
 
     dbg_print_init();
 
-    context->paused = false;
+    // Start the gradual fade after the above loading (invisible) is done
 
     const bool skip_fade_in = false;
 
     if (!skip_fade_in) {
-        fade_task_init(FADE_IN);
+        context->current_fade_handle = fade_task_init(FADE_IN)->handle;
     } else {
         pb_alpha_mask_all(0xf, true);
     }
+
+    context->paused = false;
 }
 
 void level_load(const LevelAttributes *attributes) {

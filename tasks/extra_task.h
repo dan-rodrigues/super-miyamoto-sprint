@@ -28,7 +28,10 @@ void et_reset(void);
 
 ExtraTask *et_alloc(void);
 void et_free(ExtraTask *task);
+void et_cancel(ExtraTaskHandle handle);
+
 bool et_live(const ExtraTask *task);
+bool et_handle_live(ExtraTaskHandle handle);
 
 GameLoopAction et_run(void);
 

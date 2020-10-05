@@ -48,17 +48,19 @@ int main() {
 }
 
 static void handle_gl_action(GameLoopAction action, GameContext *context) {
+    const PlayerContext *p1 = &context->players[0];
+    const LevelAttributes *level = level_attributes(0);
+
     switch (action) {
         case GL_ACTION_RESET_WORLD:
-            gl_reset_context(context, context->players[0].hero, context->players[0].camera);
-            level_init(level_attributes(0), context);
+            gl_reset_context(context, p1->hero, p1->camera);
+            level_init(level, context);
             break;
         case GL_ACTION_RELOAD_LEVEL:
-            context->resetting = false;
-            level_init(level_attributes(0), context);
+            level_init(level, context);
             break;
         case GL_ACTION_SPAWN_SPRITES:
-            dbg_reset_sprites(context->players[0].hero);
+            dbg_reset_sprites(p1->hero);
             break;
         case GL_ACTION_NONE:
             break;
