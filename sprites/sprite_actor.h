@@ -113,6 +113,7 @@ void sa_run_rideable(const SpriteEnvironment *env);
 
 SpriteActor *sa_get(SpriteActorHandle handle);
 SpriteActor *sa_index(uint8_t index);
+bool sa_iterate_all(SpriteActor *caller, SpriteActorIteratorCallback callback);
 
 struct SpriteDeferredDrawTask {
     SpriteActor *actor;

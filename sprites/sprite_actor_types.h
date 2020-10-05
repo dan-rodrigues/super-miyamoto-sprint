@@ -2,6 +2,7 @@
 #define sprite_actor_types_h
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "hero_types.h"
 #include "camera_types.h"
@@ -10,6 +11,7 @@
 typedef struct SpriteEnvironment SpriteEnvironment;
 typedef struct SpriteActor SpriteActor;
 typedef void (*SpriteActorMain)(SpriteActor *self, const SpriteEnvironment *env);
+typedef bool (*SpriteActorIteratorCallback)(SpriteActor *actor, SpriteActor *caller);
 typedef struct SpriteVehicleHeroContext SpriteVehicleHeroContext;
 
 // These happen to be the same for now but are kept separate

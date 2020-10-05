@@ -7,7 +7,7 @@
 #include "sprite_position.h"
 
 typedef struct {
-
+    // ...
 } TankDriverSprite;
 
 void tank_driver_sprite_main(SpriteActor *self, const SpriteEnvironment *env);

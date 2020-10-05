@@ -168,6 +168,21 @@ SpriteActor *sa_get(SpriteActorHandle handle) {
     return sa_index(handle.index);
 }
 
+// Returns true if one invocation of callback returned true
+bool sa_iterate_all(SpriteActor *caller, SpriteActorIteratorCallback callback) {
+    for (uint32_t i = 0; i < SPRITE_ACTOR_MAX; i++) {
+        SpriteActor *actor = &actors[i];
+        if (!sa_live(actor)) {
+            continue;;
+        }
+        if (callback(actor, caller)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 // Deferred draw handling:
 
 void sa_add_deferred_draw_task(SpriteActor *actor, SpriteDeferredDrawFunction function) {
