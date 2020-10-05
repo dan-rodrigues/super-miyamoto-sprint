@@ -62,8 +62,7 @@ void dbg_frame_action(GameContext *context) {
     const PadInputDecoded *p1_pad_edge = &context->players[0].hero->pad_edge;
 
     // Select: reset game world
-    bool fading = et_handle_live(context->current_fade_handle);
-    if (p1_pad_edge->select && !fading) {
+    if (p1_pad_edge->select && !gl_fading(context) && !context->paused) {
         // Cancel any existing fade task or there'll be glitches and other side effects
         et_cancel(context->current_fade_handle);
 
