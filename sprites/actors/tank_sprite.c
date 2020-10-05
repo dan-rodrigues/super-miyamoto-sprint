@@ -11,12 +11,13 @@
 #include "sound_effects.h"
 
 static void move(SpriteActor *self);
+static void draw(const SpriteActor *self, TankSprite *sub, const SpriteEnvironment *env);
+
 static void enemy_driver_update(SpriteActor *self, TankSprite *sub, const Hero *hero);
 static bool can_see_hero(const SpriteActor *self, const Hero *hero);
 static void position_driver(SpriteActor *self, TankSprite *sub);
 static void missile_launch_update(SpriteActor *self, TankSprite *sub);
 static void prepare_missile_firing(TankSprite *sub);
-static void draw(const SpriteActor *self, const SpriteEnvironment *env);
 static bool enemy_is_driving(SpriteActor *self, TankSprite *sub);
 static void exhaust_decoration(const SpriteActor *self, TankSprite *sub, const Hero *hero);
 
@@ -83,17 +84,19 @@ void tank_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
 
     exhaust_decoration(self, sub, hero);
 
-    draw(self, env);
+    draw(self, sub, env);
+}
+
+static int32_t speed_x(const SpriteActor *self, const Hero *hero) {
+    return ABS(hero_in_vehicle(hero, self) ? hero->velocity.x : self->velocity.x);
 }
 
 static void exhaust_decoration(const SpriteActor *self, TankSprite *sub, const Hero *hero) {
-    bool hero_driving = hero_in_vehicle(hero, self);
-
-    int32_t speed_x = ABS(hero_driving ? hero->velocity.x : self->velocity.x);
-    speed_x += Q_1;
+    int32_t speed = speed_x(self, hero);
+    speed += Q_1;
 
     uint32_t smoke_acc = sub->exahust_sprite_acc;
-    smoke_acc += speed_x / (Q_1 / 8);
+    smoke_acc += speed / (Q_1 / 8);
     if (smoke_acc > 128) {
         smoke_acc -= 128;
 
@@ -389,84 +392,6 @@ static void position_driver(SpriteActor *self, TankSprite *sub) {
     driver->direction = self->direction;
 }
 
-static void draw(const SpriteActor *self, const SpriteEnvironment *env) {
-    static const SpriteDrawParams params[9] = {
-        // Body
-
-        {
-            .tile = 0x102,
-            .offset_x = -12, .offset_y = -19,
-            .palette = 12,
-            .wide = true, .tall = true,
-            .x_flip = false, .y_flip = false
-        },
-        {
-            .tile = 0x103,
-            .offset_x = -12 + 8, .offset_y = -19,
-            .palette = 12,
-            .wide = true, .tall = true,
-            .x_flip = false, .y_flip = false
-        },
-
-        // Bottom (tracks)
-
-        {
-            .tile = 0x105,
-            .offset_x = -12 + 8, .offset_y = -19 + 16,
-            .palette = 12,
-            .wide = false, .tall = false,
-            .x_flip = false, .y_flip = false
-        },
-        {
-            .tile = 0x105,
-            .offset_x = -12 + 0, .offset_y = -19 + 16,
-            .palette = 12,
-            .wide = false, .tall = false,
-            .x_flip = false, .y_flip = false
-        },
-        {
-            .tile = 0x117,
-            .offset_x = -12 + 8, .offset_y = -19 + 16,
-            .palette = 12,
-            .wide = false, .tall = false,
-            .x_flip = false, .y_flip = false
-        },
-        {
-            .tile = 0x115,
-            .offset_x = -12 + 16, .offset_y = -19 + 16,
-            .palette = 12,
-            .wide = false, .tall = false,
-            .x_flip = false, .y_flip = false
-        },
-
-        // Exhaust
-
-        {
-            .tile = 0x107,
-            .offset_x = -12 + 24, .offset_y = -19 + 12,
-            .palette = 12,
-            .wide = false, .tall = false,
-            .x_flip = false, .y_flip = false
-        },
-        {
-            .tile = 0x116,
-            .offset_x = -12 + 24, .offset_y = -19 + 4,
-            .palette = 12,
-            .wide = false, .tall = false,
-            .x_flip = false, .y_flip = false
-        },
-        {
-            .tile = 0x106,
-            .offset_x = -12 + 24, .offset_y = -19 - 4,
-            .palette = 12,
-            .wide = false, .tall = false,
-            .x_flip = false, .y_flip = false
-        }
-    };
-
-    sa_draw_standard_multiple(self, env, params, SPRITE_DRAW_PARAM_COUNT(params));
-}
-
 static void driver_init(SpriteActor *tank) {
     SpriteActor *driver = tank_driver_sprite_init(&tank->position);
     tank->tank.driver_enemy_handle = driver->handle;
@@ -502,6 +427,7 @@ SpriteActor *tank_sprite_init(const SpritePosition *position, bool include_drive
     sub->driver_enemy_handle = SA_HANDLE_FREE;
     sub->current_state_duration = 0;
     sub->exahust_sprite_acc = 0;
+    sub->animation_acc = 0;
 
     if (include_driver) {
         driver_init(actor);
@@ -509,4 +435,109 @@ SpriteActor *tank_sprite_init(const SpritePosition *position, bool include_drive
     }
 
     return actor;
+}
+
+static void draw(const SpriteActor *self, TankSprite *sub, const SpriteEnvironment *env) {
+    static const SpriteDrawParams body_params[2][2] = {
+        {
+            {
+                .tile = 0x102,
+                .offset_x = -12, .offset_y = -19,
+                .palette = 12,
+                .wide = true, .tall = true,
+                .x_flip = false, .y_flip = false
+            },
+            {
+                .tile = 0x103,
+                .offset_x = -12 + 8, .offset_y = -19,
+                .palette = 12,
+                .wide = true, .tall = true,
+                .x_flip = false, .y_flip = false
+            },
+        },
+        {
+            {
+                .tile = 0x10a,
+                .offset_x = -12, .offset_y = -19,
+                .palette = 12,
+                .wide = true, .tall = true,
+                .x_flip = false, .y_flip = false
+            },
+            {
+                .tile = 0x10b,
+                .offset_x = -12 + 8, .offset_y = -19,
+                .palette = 12,
+                .wide = true, .tall = true,
+                .x_flip = false, .y_flip = false
+            }
+        }
+    };
+
+    static const SpriteDrawParams params[] = {
+        // Bottom (tracks)
+        {
+            .tile = 0x105,
+            .offset_x = -12 + 8, .offset_y = -19 + 16,
+            .palette = 12,
+            .wide = false, .tall = false,
+            .x_flip = false, .y_flip = false
+        },
+        {
+            .tile = 0x105,
+            .offset_x = -12 + 0, .offset_y = -19 + 16,
+            .palette = 12,
+            .wide = false, .tall = false,
+            .x_flip = false, .y_flip = false
+        },
+        {
+            .tile = 0x117,
+            .offset_x = -12 + 8, .offset_y = -19 + 16,
+            .palette = 12,
+            .wide = false, .tall = false,
+            .x_flip = false, .y_flip = false
+        },
+        {
+            .tile = 0x115,
+            .offset_x = -12 + 16, .offset_y = -19 + 16,
+            .palette = 12,
+            .wide = false, .tall = false,
+            .x_flip = false, .y_flip = false
+        },
+        // Exhaust
+        {
+            .tile = 0x107,
+            .offset_x = -12 + 24, .offset_y = -19 + 12,
+            .palette = 12,
+            .wide = false, .tall = false,
+            .x_flip = false, .y_flip = false
+        },
+        {
+            .tile = 0x116,
+            .offset_x = -12 + 24, .offset_y = -19 + 4,
+            .palette = 12,
+            .wide = false, .tall = false,
+            .x_flip = false, .y_flip = false
+        },
+        {
+            .tile = 0x106,
+            .offset_x = -12 + 24, .offset_y = -19 - 4,
+            .palette = 12,
+            .wide = false, .tall = false,
+            .x_flip = false, .y_flip = false
+        }
+    };
+
+    int32_t speed = speed_x(self, env->hero);
+    uint32_t animation_acc = sub->animation_acc;
+    animation_acc += speed / (Q_1 / 32);
+    if (animation_acc > 64) {
+        animation_acc -= 64;
+        sub->animation_index++;
+        sub->animation_index %= 2;
+    }
+    sub->animation_acc =animation_acc;
+
+    const SpriteDrawParams *body = body_params[sub->animation_index];
+    sa_draw_standard_multiple(self, env, body, SPRITE_DRAW_PARAM_COUNT(body_params[0]));
+    sa_draw_standard_multiple(self, env, params, SPRITE_DRAW_PARAM_COUNT(params));
 }

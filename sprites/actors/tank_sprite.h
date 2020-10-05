@@ -25,6 +25,8 @@ typedef struct {
     bool firing, launch_pending;
 
     uint8_t exahust_sprite_acc;
+    uint8_t animation_acc;
+    uint8_t animation_index;
 
     SpriteActorHandle driver_enemy_handle;
 } TankSprite;
