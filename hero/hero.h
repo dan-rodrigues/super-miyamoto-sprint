@@ -21,16 +21,15 @@ extern const uint8_t HERO_SPRINT_CHARGE_TIME;
 extern const HeroFrame HERO_IDLE_FRAME;
 
 enum HeroFrame {
-    HF_RUN0, HF_RUN1, HF_RUN2,
+    HF_RUN0 = 0, HF_RUN1, HF_RUN2,
     HF_SPRINT0, HF_SPRINT1, HF_SPRINT2,
     HF_CARRY0, HF_CARRY1, HF_CARRY2,
 
-    HF_KICK,
+    HF_CLIMBING0, HF_CLIMBING1,
 
+    HF_KICK,
     HF_DRIVING,
 
-    HF_CLIMBING0, HF_CLIMBING1,
-    
     HF_RUN_TURNING,
 
     HF_JUMP_RISING, HF_JUMP_FALLING,
@@ -42,9 +41,8 @@ enum HeroFrame {
     HF_LOOKING_SCREEN_LEFT,
     HF_LOOKING_SCREEN_RIGHT,
 
-    HF_DUCKING,
-
     HF_PEACE_SIGN,
+    HF_DUCKING,
 
     HF_UNDEFINED
 };
@@ -115,9 +113,6 @@ struct HeroTileOffset {
 #define HERO_FRAME_TILES_END -1
 
 struct HeroFrameLayout {
-    // This field temporary for as long as dictionary-lookup is used
-    const HeroFrame frame;
-
     const int8_t x_flip_offset;
     const uint8_t x_flip;
 
