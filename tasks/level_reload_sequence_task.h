@@ -15,6 +15,7 @@ typedef struct {
     LevelReloadSequenceState state;
     ExtraTask *current_subtask;
     uint8_t delay_counter;
+    uint16_t fade_palette_mask;
     GameLoopAction final_action;
 } LevelReloadSequenceTask;
 

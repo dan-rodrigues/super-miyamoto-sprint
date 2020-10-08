@@ -12,7 +12,78 @@
 #include "vram_layout.h"
 #include "palette_buffer.h"
 
-void hero_draw(Hero *hero, int16_t sprite_tile, Camera *camera) {
+static const HeroFrameLayout *frame_layout(HeroFrame frame);
+
+static const HeroTileOffset sprint_frame_offsets[] = {
+    { .x = 0, .y = 0 },
+    { .x = 0, .y = -16 },
+    { .x = 16, .y = 0 }
+};
+
+static const HeroTileOffset kick_frame_offsets[] = {
+    { .x = 0, .y = 0 },
+    { .x = 0, .y = -16 },
+    { .x = -16, .y = 0 }
+};
+
+static const HeroTileOffset standard_offsets[] = {
+    { .x = 0, .y = 0 },
+    { .x = 0, .y = -16 }
+};
+
+static const HeroTileOffset driving_offsets[] = {
+    { .x = 4, .y = -2 },
+    { .x = 4, .y = -18 }
+};
+
+static const HeroTileOffset carry_offsets[] = {
+    { .x = 1, .y = 0 },
+    { .x = 0, .y = -16 }
+};
+
+static const HeroFrameLayout hero_frames[] = {
+    {HF_RUN0, 2, 0, {0x000, 0x0e0, -1}, standard_offsets, {0, -1}},
+    {HF_RUN1, 2, 0, {0x002, 0x0e0, -1}, standard_offsets},
+    {HF_RUN2, 2, 0, {0x004, 0x0e0, -1}, standard_offsets, {0, 0}},
+
+    {HF_SPRINT0, 2, 0, {0x028, 0x0e0, 0x2c2}, sprint_frame_offsets, {0, -1}},
+    {HF_SPRINT1, 2, 0, {0x026, 0x0e0, 0x2c2}, sprint_frame_offsets},
+    {HF_SPRINT2, 2, 0, {0x024, 0x0e0, 0x2c2}, sprint_frame_offsets, {0, 0}},
+
+    {HF_CARRY0, 2, 0, {0x04c, 0x0e0, -1}, carry_offsets, {0, -1}},
+    {HF_CARRY1, 2, 0, {0x04e, 0x0e0, -1}, carry_offsets},
+    {HF_CARRY2, 2, 0, {0x060, 0x0e0, -1}, carry_offsets, {0, 0}},
+
+    {HF_DRIVING, 6, 0, {0x004, 0x0e0, -1}, driving_offsets, {0, 0}},
+
+    {HF_KICK, 2, 0, {0x062, 0x0e0, 0x2c6}, kick_frame_offsets, {0, 0}},
+
+    {HF_CLIMBING0, 0, 0, {0x06c, 0x08c, -1}, standard_offsets, {0, 0}},
+    {HF_CLIMBING1, 0, 1, {0x06c, 0x08c, -1}, standard_offsets, {0, 0}},
+
+    {HF_RUN_TURNING, 2, 0, {0x008, 0x2c4, -1}, standard_offsets, {0, 0}},
+
+    {HF_JUMP_RISING, 2, 0, {0x006, 0x0e8, -1}, standard_offsets, {0, 0}},
+    {HF_JUMP_FALLING, 2, 0, {0x1a4, 0x18e, -1}, standard_offsets, {0, 0}},
+
+    {HF_JUMP_SPRINTING, 2, 0, {0x02a, 0x18e, 0x2c0}, sprint_frame_offsets, {0, 0}},
+
+    {HF_LOOKING_UP, 0, 0, {0x004, 0x140, -1}, standard_offsets, {0, 0}},
+
+    {HF_LOOKING_SCREEN_DIRECT, 0, 0, {0x00e, 0x108, -1}, standard_offsets, {0, 0}},
+    {HF_LOOKING_SCREEN_LEFT, 0, 0, {0x00e, 0x0e0, -1}, standard_offsets, {0, 0}},
+    {HF_LOOKING_SCREEN_RIGHT,0, 1, {0x00e, 0x0e0, -1}, standard_offsets, {0, 0}},
+
+    {HF_PEACE_SIGN, 0, 0, {0x16e, 0x166, -1}, standard_offsets, {0, 0}},
+
+    {HF_DUCKING, 5, 0, {0x00c, -1}, standard_offsets, {0, 0}},
+
+    {HF_UNDEFINED, 0, 0, {-1}, standard_offsets, {0, 0}}
+};
+
+static const size_t hero_frame_count = sizeof(hero_frames) / sizeof(HeroFrameLayout);
+
+void hero_draw(Hero *hero, int16_t sprite_tile, const Camera *camera) {
     if (hero->transluscent != hero->uploaded_transluscent_palette) {
         uint8_t alpha = (hero->transluscent ? 0x8 : 0xf);
         pb_alpha_mask_palette(8, alpha, false);
@@ -23,90 +94,13 @@ void hero_draw(Hero *hero, int16_t sprite_tile, Camera *camera) {
     if (!hero->visible) {
         return;
     }
-    
-    static const HeroTileOffset sprint_frame_offsets[] = {
-        { .x = 0, .y = 0 },
-        { .x = 0, .y = -16 },
-        { .x = 16, .y = 0 }
-    };
-
-    static const HeroTileOffset kick_frame_offsets[] = {
-        { .x = 0, .y = 0 },
-        { .x = 0, .y = -16 },
-        { .x = -16, .y = 0 }
-    };
-
-    static const HeroTileOffset standard_offsets[] = {
-        { .x = 0, .y = 0 },
-        { .x = 0, .y = -16 }
-    };
-
-    static const HeroTileOffset driving_offsets[] = {
-        { .x = 4, .y = -2 },
-        { .x = 4, .y = -18 }
-    };
-
-    static const HeroTileOffset carry_offsets[] = {
-        { .x = 1, .y = 0 },
-        { .x = 0, .y = -16 }
-    };
-
-    static const HeroFrameLayout hero_frames[] = {
-        {HF_RUN0, 2, 0, {0x000, 0x0e0, -1}, standard_offsets, {0, -1}},
-        {HF_RUN1, 2, 0, {0x002, 0x0e0, -1}, standard_offsets},
-        {HF_RUN2, 2, 0, {0x004, 0x0e0, -1}, standard_offsets, {0, 0}},
-
-        {HF_SPRINT0, 2, 0, {0x028, 0x0e0, 0x2c2}, sprint_frame_offsets, {0, -1}},
-        {HF_SPRINT1, 2, 0, {0x026, 0x0e0, 0x2c2}, sprint_frame_offsets},
-        {HF_SPRINT2, 2, 0, {0x024, 0x0e0, 0x2c2}, sprint_frame_offsets, {0, 0}},
-
-        {HF_CARRY0, 2, 0, {0x04c, 0x0e0, -1}, carry_offsets, {0, -1}},
-        {HF_CARRY1, 2, 0, {0x04e, 0x0e0, -1}, carry_offsets},
-        {HF_CARRY2, 2, 0, {0x060, 0x0e0, -1}, carry_offsets, {0, 0}},
-
-        {HF_DRIVING, 6, 0, {0x004, 0x0e0, -1}, driving_offsets, {0, 0}},
-
-        {HF_KICK, 2, 0, {0x062, 0x0e0, 0x2c6}, kick_frame_offsets, {0, 0}},
-
-        {HF_CLIMBING0, 0, 0, {0x06c, 0x08c, -1}, standard_offsets, {0, 0}},
-        {HF_CLIMBING1, 0, 1, {0x06c, 0x08c, -1}, standard_offsets, {0, 0}},
-
-        {HF_RUN_TURNING, 2, 0, {0x008, 0x2c4, -1}, standard_offsets, {0, 0}},
-
-        {HF_JUMP_RISING, 2, 0, {0x006, 0x0e8, -1}, standard_offsets, {0, 0}},
-        {HF_JUMP_FALLING, 2, 0, {0x1a4, 0x18e, -1}, standard_offsets, {0, 0}},
-
-        {HF_JUMP_SPRINTING, 2, 0, {0x02a, 0x18e, 0x2c0}, sprint_frame_offsets, {0, 0}},
-
-        {HF_LOOKING_UP, 0, 0, {0x004, 0x140, -1}, standard_offsets, {0, 0}},
-
-        {HF_LOOKING_SCREEN_DIRECT, 0, 0, {0x00e, 0x108, -1}, standard_offsets, {0, 0}},
-        {HF_LOOKING_SCREEN_LEFT, 0, 0, {0x00e, 0x0e0, -1}, standard_offsets, {0, 0}},
-        {HF_LOOKING_SCREEN_RIGHT,0, 1, {0x00e, 0x0e0, -1}, standard_offsets, {0, 0}},
-
-        {HF_PEACE_SIGN, 0, 0, {0x16e, 0x166, -1}, standard_offsets, {0, 0}},
-
-        {HF_DUCKING, 5, 0, {0x00c, -1}, standard_offsets, {0, 0}},
-
-        {HF_UNDEFINED, 0, 0, {-1}, standard_offsets, {0, 0}}
-    };
-
-    static const size_t hero_frame_count = sizeof(hero_frames) / sizeof(HeroFrameLayout);
 
     const uint8_t hero_palette = 8;
     const uint8_t hero_priority = 3;
 
     // This can be removed when the dictionary is replaced with a table for fast lookup
 
-    const HeroFrameLayout *sprite_frame = NULL;
-    for (uint16_t i = 0; i < hero_frame_count; i++) {
-        if (hero_frames[i].frame == hero->frame) {
-            sprite_frame = &hero_frames[i];
-            break;
-        }
-    }
-
-    assert(sprite_frame);
+    const HeroFrameLayout *sprite_frame = frame_layout(hero->frame);
 
     const int16_t x_offset = -11;
     const int16_t y_offset = -17;
@@ -169,4 +163,37 @@ void hero_draw(Hero *hero, int16_t sprite_tile, Camera *camera) {
 
         sprite_tile += 2;
     }
+}
+
+void hero_16x16_arrangements(HeroFrame frame, HeroTileArrangement *arrangements, size_t limit) {
+    const HeroFrameLayout *sprite_frame = frame_layout(frame);
+
+    for (uint32_t i = 0; i < HERO_FRAME_MAX_TILES; i++) {
+        int16_t frame_tile = sprite_frame->tiles[i];
+        if ((frame_tile == HERO_FRAME_TILES_END) || (i >= limit)) {
+            break;
+        }
+
+        HeroTileArrangement arrangement = {
+            .x = sprite_frame->offset.x + sprite_frame->tile_offsets[i].x,
+            .y = sprite_frame->offset.y + sprite_frame->tile_offsets[i].y,
+            .top_row = miyamoto_tiles + sprite_frame->tiles[i] * 0x10,
+            .bottom_row = miyamoto_tiles + sprite_frame->tiles[i] * 0x10 + 0x100,
+        };
+
+        arrangements[i] = arrangement;
+    }
+}
+
+static const HeroFrameLayout *frame_layout(HeroFrame frame) {
+    const HeroFrameLayout *frame_layout = NULL;
+    for (uint16_t i = 0; i < hero_frame_count; i++) {
+        if (hero_frames[i].frame == frame) {
+            frame_layout = &hero_frames[i];
+            break;
+        }
+    }
+
+    assert(frame_layout);
+    return frame_layout;
 }

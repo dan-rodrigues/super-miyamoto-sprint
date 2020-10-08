@@ -6,7 +6,8 @@
 * [Enemy sprites](https://opengameart.org/content/arcade-platformer-assets) by GrafxKid
 * [More enemy sprites](https://opengameart.org/content/classic-hero-and-baddies-pack) by GrafxKid
 * [Heart icon](https://opengameart.org/content/heart-1616) by Nicole Marie T
-* [8x16 font](https://opengameart.org/content/bitmap-font) by Clint Bellanger
+* [Font](https://opengameart.org/content/good-neighbors-pixel-font) by Clint Bellanger
+* [8x16 font (previous)](https://opengameart.org/content/bitmap-font) by Clint Bellanger
 * [Rolling enemy sprite](https://www.smwcentral.net/?p=section&a=details&id=22033) by Blizzard Buffalo
 * [Bushes & Hills](https://www.smwcentral.net/?p=section&a=details&id=13141) by Gamma V
 * [Redrawn Graphics](https://www.romhacking.net/hacks/2919/) (partial use) by IceGoom

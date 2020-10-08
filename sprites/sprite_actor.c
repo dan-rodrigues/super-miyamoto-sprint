@@ -54,7 +54,9 @@ void sa_init(SpriteActor *actor, SpriteActorMain main) {
     actor->velocity.x = 0;
     actor->velocity.y = 0;
 
+#ifdef DEBUG_PRINT
     actor->debug_label = NULL;
+#endif
 
     actor->direction = LEFT;
 }
@@ -196,7 +198,7 @@ void sa_add_deferred_draw_task(SpriteActor *actor, SpriteDeferredDrawFunction fu
     deferred_draw_tasks[deferred_draw_index++] = task;
 }
 
-void sa_run_deferred_draw_tasks(SpriteEnvironment *environment) {
+void sa_run_deferred_draw_tasks(const SpriteEnvironment *environment) {
     for (uint32_t i = 0; i < deferred_draw_index; i++) {
         SpriteDeferredDrawTask task = deferred_draw_tasks[i];
         task.function(task.actor, environment);

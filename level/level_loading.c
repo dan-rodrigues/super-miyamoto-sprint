@@ -33,6 +33,8 @@
 void level_init(const LevelAttributes *attributes, GameContext *context) {
     const PlayerContext *p1 = &context->players[0];
 
+    // Load and initialize various level attributes while screen is inactive
+    
     level_load(attributes);
 
     hero_level_init(p1->hero, attributes, p1->max_life, p1->midpoint_reached);
@@ -46,7 +48,9 @@ void level_init(const LevelAttributes *attributes, GameContext *context) {
     const bool skip_fade_in = false;
 
     if (!skip_fade_in) {
-        context->current_fade_handle = fade_task_init(FADE_IN)->handle;
+        ExtraTask *fade = fade_task_init(FADE_IN);
+        fade->fade.fade_delta = 2;
+        context->current_fade_handle = fade->handle;
     } else {
         pb_alpha_mask_all(0xf, true);
     }

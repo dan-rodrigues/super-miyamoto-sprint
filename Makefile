@@ -17,10 +17,8 @@ ICS32_SW_DIR = icestation-32/software/
 
 SOURCES = \
 	main.c \
-	game_loop.c \
 	hero/hero.c \
 	hero/hero_drawing.c \
-	hero/hero_init.c \
 	hero/hero_life_meter.c \
 	sprites/sprite_buffer.c \
 	sprites/sprite_position.c \
@@ -31,11 +29,11 @@ SOURCES = \
 	sprites/sprite_drawing.c \
 	sprites/sprite_loading.c \
 	sprites/sprite_text.c \
+	sprites/sprite_text_attributes.c \
 	sprites/actors/smoke_sprite.c \
 	sprites/actors/moving_smoke_sprite.c \
 	sprites/actors/basic_enemy_sprite.c \
 	sprites/actors/impact_sprite.c \
-	sprites/actors/enemy_generator_sprite.c \
 	sprites/actors/layered_enemy_sprite.c \
 	sprites/actors/platform_sprite.c \
 	sprites/actors/ball_enemy_sprite.c \
@@ -54,7 +52,6 @@ SOURCES = \
 	tasks/fade_task.c \
 	tasks/palette_lerp_task.c \
 	level/camera.c \
-	level/camera_init.c \
 	level/block.c \
 	level/level_attributes.c \
 	timers/global_timers.c \
@@ -70,6 +67,10 @@ SOURCES = \
 	debug/debug_block.c \
 	debug/debug_print.c \
 	debug/debug_playfield.c \
+	affine/affine.c \
+	game_loop/credits_loop.c \
+	game_loop/gameplay_loop.c \
+	game_loop/game_loop.c \
 	gcc_lib/gcc_lib.c \
 
 LIB_SOURCES := \
@@ -78,6 +79,7 @@ LIB_SOURCES := \
 	assert.c \
 	vdp_print.c \
 	audio.c \
+	copper.c \
 	gamepad.c
 
 SOURCES += $(addprefix $(ICS32_SW_DIR)common/, \
@@ -88,7 +90,9 @@ SOURCES += $(addprefix $(ICS32_SW_DIR)common/, \
 CPU_SLOW_SOURCES := \
 	debug/debug_custom_assert.c \
 	palette/palette_init.c \
-	level/level_loading.c
+	level/level_loading.c \
+	level/camera_init.c \
+	hero/hero_init.c
 
 CPU_SLOW_SOURCES += $(addprefix $(ICS32_SW_DIR)common/, \
 	font.c \
@@ -224,6 +228,8 @@ CFLAGS_INCLUDE_DIRS := $(addprefix -I, \
 	assets/maps/ \
 	timers/ \
 	tasks/ \
+	affine/ \
+	game_loop/ \
 	)
 
 EXTRA_CFLAGS := $(CFLAGS_INCLUDE_DIRS)
@@ -270,6 +276,8 @@ endif
 audio/music.o: MUSIC
 
 debug/debug_print.o: DEBUG_PRINT
+sprites/sprite_actor.h: DEBUG_PRINT
+sprites/sprite_actor.o: DEBUG_PRINT
 palette/palette_init.o: DEBUG_PRINT
 level/level_loading.o: DEBUG_PRINT
 

@@ -13,7 +13,9 @@ typedef enum {
 typedef struct {
     uint8_t fade_step;
     uint8_t fade_delta;
+    uint16_t palette_mask;
     FadeTaskType type;
+    GameLoopAction final_action;
 } FadeTask;
 
 ExtraTask *fade_task_init(FadeTaskType type);

@@ -8,7 +8,6 @@
 #include "basic_enemy_sprite.h"
 #include "impact_sprite.h"
 #include "smoke_sprite.h"
-#include "enemy_generator_sprite.h"
 
 #include "vram_layout.h"
 
@@ -21,8 +20,6 @@ static const char *dbg_actor_title(const SpriteActor *actor) {
         return "basic enemy";
     if (main == impact_sprite_main)
         return "impact";
-    if (main == enemy_generator_sprite_main)
-        return "enemy generator";
     if (main == smoke_sprite_main)
         return "smoke (small)";
 

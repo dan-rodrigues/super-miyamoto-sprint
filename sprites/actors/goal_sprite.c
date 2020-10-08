@@ -7,6 +7,7 @@
 #include "sprite_drawing.h"
 #include "extra_task.h"
 #include "hero.h"
+#include "sound_effects.h"
 
 static void draw(const SpriteActor *self, const SpriteEnvironment *env);
 
@@ -14,6 +15,9 @@ void goal_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
     if (sa_hero_standard_collision(self, env->hero)) {
         hero_mark_goal_reached(env->hero);
         sa_free(self);
+
+        se_powerup();
+        
         return;
     }
 

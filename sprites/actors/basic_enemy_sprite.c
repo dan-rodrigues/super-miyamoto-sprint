@@ -99,9 +99,6 @@ SpriteActor *basic_enemy_sprite_init(const SpritePosition *position, bool spiked
 
     const uint8_t time_to_expire = 40;
 
-
-    actor->debug_label = spiked ? "(spiked)" : "(regular)";
-
     static const SpriteBoundingBox sprite_box = {
         .offset = { -8, -10 },
         .size = { 16, 10 }

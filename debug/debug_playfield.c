@@ -25,20 +25,6 @@ void dbg_init_playfield(GameContext *context) {
     level_init(attributes, context);
 }
 
-void dbg_reset_sprites(Hero *hero) {
-    hero->life = 3;
-    sa_reset();
-
-    // TEST: Spawn a controllable enemy generator
-    SpritePosition position = hero->position;
-    position.x -= 64;
-    position.y -= 128;
-    enemy_generator_sprite_init(&position);
-
-    position.x += 128;
-    enemy_generator_sprite_init(&position);
-}
-
 void dbg_spawn_platform(const Hero *hero) {
     SpritePosition position = hero->position;
     position.x = hero->position.x;
@@ -61,12 +47,8 @@ void dbg_print_sandbox_instructions() {
 void dbg_frame_action(GameContext *context) {
     const PadInputDecoded *p1_pad_edge = &context->players[0].hero->pad_edge;
 
-    // Select: reset game world
-    if (p1_pad_edge->select && !gl_fading(context) && !context->paused) {
-        // Cancel any existing fade task or there'll be glitches and other side effects
-        et_cancel(context->current_fade_handle);
-
-        // Fade out and reload
+    // Select: reset game world (fade out and reload)
+    if (!gl_fading(context) && p1_pad_edge->select && !context->paused) {
         ExtraTask *reload_task = level_reload_sequence_task_init(0);
         reload_task->level_reload_sequence.final_action = GL_ACTION_RESET_WORLD;
         context->current_fade_handle = reload_task->handle;
