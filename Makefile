@@ -51,6 +51,7 @@ SOURCES = \
 	tasks/level_reload_sequence_task.c \
 	tasks/fade_task.c \
 	tasks/palette_lerp_task.c \
+	tasks/music_fade_task.c \
 	level/camera.c \
 	level/block.c \
 	level/level_attributes.c \
@@ -182,6 +183,8 @@ WAV_FILES := $(addprefix $(AUDIO_ASSETS_DIR), \
 WAV_MUSIC_FILES := $(addprefix $(AUDIO_ASSETS_DIR), \
 	track1_left.wav \
 	track1_right.wav \
+	track2_left.wav \
+	track2_right.wav \
 	)
 
 ifeq ($(MUSIC), 1)
@@ -271,7 +274,7 @@ level/block.o: $(LEVEL_DIR)block_map_table.h $(LEVEL_DIR)block_attributes.h
 game_loop.o: $(LEVEL_DIR)block_map_table.h
 
 ifeq ($(MUSIC), 1)
-audio/music.o: $(addprefix $(AUDIO_ASSETS_DIR), track1_left.h track1_right.h)
+audio/music.o: $(addprefix $(AUDIO_ASSETS_DIR), track1_left.h track1_right.h track2_left.h track2_right.h)
 endif
 
 audio/music.o: MUSIC
@@ -359,10 +362,15 @@ $(AUDIO_ASSETS_DIR)track%.adpcm: $(AUDIO_ASSETS_DIR)track%.wav
 %.c %.h: %.adpcm $(HEADER_GEN)
 	$(HEADER_GEN) -t int16_t -s -i $(basename $(<F)) -o $(@D)/$(*F) $<
 
-# Optional music
+### Optional music
+
+# Level
 
 track1.opus:
 	youtube-dl -f bestaudio -x --audio-format opus -o "track1.%(ext)s" -k https://www.youtube.com/watch?v=AhSqF0mYz-A
+
+track2.opus:
+	youtube-dl -f bestaudio -x --audio-format opus -o "track2.%(ext)s" -k https://www.youtube.com/watch?v=vwP-SDtHd6A
 
 TRACK1_L_WAV := $(AUDIO_ASSETS_DIR)track1_left.wav
 TRACK1_R_WAV := $(AUDIO_ASSETS_DIR)track1_right.wav
@@ -370,7 +378,22 @@ TRACK1_R_WAV := $(AUDIO_ASSETS_DIR)track1_right.wav
 $(TRACK1_L_WAV) $(TRACK1_R_WAV): track1.opus
 	ffmpeg -y -i $< \
 	-ar 22050 \
+	-af "atrim=end='03\:17',afade=out:st='03\:10':d=5.0" \
 	-map_channel 0.0.0 $(TRACK1_L_WAV) \
 	-ar 22050 \
+	-af "atrim=end='03\:17',afade=out:st='03\:10':d=5.0" \
 	-map_channel 0.0.1 $(TRACK1_R_WAV)
 
+TRACK2_L_WAV := $(AUDIO_ASSETS_DIR)track2_left.wav
+TRACK2_R_WAV := $(AUDIO_ASSETS_DIR)track2_right.wav
+
+# Credits:
+
+$(TRACK2_L_WAV) $(TRACK2_R_WAV): track2.opus
+	ffmpeg -y -i $< \
+	-ar 22050 \
+	-af "atrim=end='02\:25',afade=out:st='02\:18':d=5.0" \
+	-map_channel 0.0.0 $(TRACK2_L_WAV) \
+	-ar 22050 \
+	-af "atrim=end='02\:25',afade=out:st='02\:18':d=5.0" \
+	-map_channel 0.0.1 $(TRACK2_R_WAV)

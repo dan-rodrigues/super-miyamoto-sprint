@@ -1,6 +1,6 @@
 # Super Miyamoto Sprint (WIP)
 
-This is a simple retro-inspired platformer game (implemented in C11) targetting a [retro-inspired FPGA game](https://github.com/dan-rodrigues/icestation-32) console by the same author (implemented in Verilog). It uses sprites and tilemaps to displays graphics similar to other games of the period and works with modest CPU speed and RAM.
+This is a simple retro-inspired platformer game (implemented in C11) targetting a [retro-inspired FPGA game](https://github.com/dan-rodrigues/icestation-32) console by the same author (implemented in Verilog). It is a bare metal program using sprites and tilemaps to displays graphics similar to other games of the period and works with modest CPU speed and RAM.
 
 One complete level is playable.
 
@@ -8,9 +8,27 @@ One complete level is playable.
 
 ## Binaries
 
-TODO
+FPGA bitstreams and game binaries for the program can be downloaded from the [Releases](/releases/latest) page. The game should start after flashing the bitstream.
 
-## Prerequisites
+### Flashing to iCEBreaker
+
+```
+iceprog -o 2M prog.bin
+iceprog ics32-icebreaker.bit
+```
+
+### Flashing to ULX3S
+
+```
+fujprog -j flash -f 0x200000 prog.bin
+fujprog -j flash ics32-ulx3s.bit
+```
+
+* Only the 85F boards are supported as the 12F doesn't have enough block RAM.
+* Note that `fujprog` will be slow to flash if you are using a game binary with music included.
+* Binaries with music included require a board with 16MByte of flash.
+
+## Build prerequisites
 
 * GNU RISC-V toolchain for cross compilation
 * GNU Make (any version >= 3.81 should work)
@@ -23,9 +41,9 @@ If running on an iCEBreaker, ULX3S or other supported board, the [prerequsites h
 
 Sound effects are included by default but music is not. Running any of the Makefile targets with `MUSIC=1` will:
 
-1. Download and extract audio from a preconfigured Youtube video using youtube-dl with (default is included but can be changed in Makefile)
-2. Convert it using ffmpeg to the required system format (IMA-ADPCM)
-3. Include it in the output binary
+1. Download and extract audio from preconfigured Youtube videos using youtube-dl with (default is included but can be changed in Makefile)
+2. Convert them using ffmpeg to the required system format (IMA-ADPCM)
+3. Include them in the output binary
 
 ### Extra prerequisities
 

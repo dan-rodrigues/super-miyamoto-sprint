@@ -40,9 +40,6 @@ int main() {
     gl_reset_context(&context, &hero, &camera, &sprite_loading_context);
 
     handle_gl_action(GL_ACTION_RESET_WORLD, &context);
-//    handle_gl_action(GL_ACTION_SHOW_CREDITS, &context);
-
-    music_start();
     
     while (true) {
         GameLoopAction action = gl_run_frame(&context);
@@ -60,6 +57,7 @@ static void handle_gl_action(GameLoopAction action, GameContext *context) {
         case GL_ACTION_RESET_WORLD:
             gl_reset_context(context, p1->hero, p1->camera, p1->sprite_context);
             level_init(level, context);
+            music_start(TRACK_LEVEL_1);
             break;
         case GL_ACTION_RELOAD_LEVEL:
             level_init(level, context);

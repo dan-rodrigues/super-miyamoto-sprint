@@ -65,7 +65,8 @@ void credits_frame_ended_update(CreditsState state) {
     VDPLayer alpha_layers = SPRITES;
     bool affine_alpha_enabled = (
         state == CREDITS_STATE_INITIAL_DELAY ||
-        state == CREDITS_STATE_FADE_OUT_HERO
+        state == CREDITS_STATE_FADE_OUT_HERO ||
+        state == CREDITS_STATE_FADE_OUT_MUSIC
     );
     alpha_layers |= (affine_alpha_enabled ? SCROLL0 : 0);
     vdp_set_alpha_over_layers(alpha_layers);
@@ -134,6 +135,10 @@ static void state_update(GameContext *context) {
             }
             break;
         case CREDITS_STATE_FADE_OUT_HERO:
+            state_transition_when_fade_complete(context, CREDITS_STATE_FADE_OUT_MUSIC);
+            break;
+        case CREDITS_STATE_FADE_OUT_MUSIC:
+            // Will automatically reset world when complete, no action needed
             break;
     }
 }
@@ -169,8 +174,12 @@ static void state_transition(GameContext *context, CreditsState new_state) {
             start_fade(context, FADE_OUT, text_palette_mask);
             break;
         case CREDITS_STATE_FADE_OUT_HERO: {
-            FadeTask *fade = start_fade(context, FADE_OUT, hero_palette_mask);
-            fade->final_action = GL_ACTION_RESET_WORLD;
+            start_fade(context, FADE_OUT, hero_palette_mask);
+        } break;
+        case CREDITS_STATE_FADE_OUT_MUSIC: {
+            ExtraTask *fade_task = music_fade_task_init();
+            fade_task->music_fade.final_action = GL_ACTION_RESET_WORLD;
+            context->current_fade_handle = fade_task->handle;
         } break;
         case CREDITS_STATE_DISPLAYING_TECH: case CREDITS_STATE_DISPLAYING_ART:
             break;

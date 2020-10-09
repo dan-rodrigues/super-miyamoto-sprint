@@ -708,7 +708,7 @@ bool hero_vehicle_control_state(const Hero *hero, HeroVehicleControl *control) {
     control->move_fast = pad->y;
 
     control->eject = false;
-    control->action = pad_edge->x || pad_edge->r;
+    control->action = pad_edge->x || pad_edge->r || pad_edge->y;
     control->move_left = pad->left;
     control->move_right = pad->right;
     control->jump = pad_edge->b && hero->grounded;

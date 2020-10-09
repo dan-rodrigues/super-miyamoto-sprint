@@ -18,5 +18,6 @@
 * [Many retro sound effects](https://opengameart.org/content/retro-game-sounds-volume-2) by jalastram
 * [8bit power up sound effects](https://opengameart.org/content/8-bit-powerup-1) by jalastram
 * [Background music](https://www.youtube.com/watch?v=AhSqF0mYz-A) by FUSIONROCKER
+* [Background music](https://www.youtube.com/watch?v=vwP-SDtHd6A) by Square Holic
 * [Missile launch sound effects](https://opengameart.org/content/4-projectile-launches) by Michel Baradari
 * [Rumble explosion sound effect](https://opengameart.org/content/rumbleexplosion) by Michel Baradari

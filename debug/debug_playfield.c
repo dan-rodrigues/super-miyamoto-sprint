@@ -49,7 +49,7 @@ void dbg_frame_action(GameContext *context) {
 
     // Select: reset game world (fade out and reload)
     if (!gl_fading(context) && p1_pad_edge->select && !context->paused) {
-        ExtraTask *reload_task = level_reload_sequence_task_init(0);
+        ExtraTask *reload_task = level_reload_sequence_task_init(0, true);
         reload_task->level_reload_sequence.final_action = GL_ACTION_RESET_WORLD;
         context->current_fade_handle = reload_task->handle;
     }

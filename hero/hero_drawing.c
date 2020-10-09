@@ -80,7 +80,12 @@ static const HeroFrameLayout hero_frames[] = {
 };
 
 void hero_draw(Hero *hero, int16_t sprite_tile, const Camera *camera) {
-    if (hero->transluscent != hero->uploaded_transluscent_palette) {
+    bool should_update_palette = (
+        hero->transluscent != hero->uploaded_transluscent_palette &&
+        !hero->goal_reached
+    );
+
+    if (should_update_palette) {
         uint8_t alpha = (hero->transluscent ? 0x8 : 0xf);
         pb_alpha_mask_palette(8, alpha, false);
 

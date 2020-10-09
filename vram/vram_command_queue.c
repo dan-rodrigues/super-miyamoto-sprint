@@ -11,14 +11,7 @@ static VRAMUploadCommand queue[COMMAND_QUEUE_MAX];
 void vcq_add(const VRAMUploadCommand *cmd) {
     assert(queue_index < COMMAND_QUEUE_MAX);
 
-    VRAMUploadCommand *target = &queue[queue_index];
-    target->address = cmd->address;
-    target->length = cmd->length;
-    target->increment = cmd->increment;
-    target->is_inline = cmd->is_inline;
-    target->data = cmd->data;
-
-    queue_index++;
+    queue[queue_index++] = *cmd;
 }
 
 void vcq_reset() {

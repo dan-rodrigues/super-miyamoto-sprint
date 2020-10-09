@@ -19,6 +19,8 @@
 #include "credits_loop.h"
 
 GameLoopAction gl_run_frame(GameContext *context) {
+    const bool show_raster_counter = false;
+
     PlayerContext *p1 = &context->players[0];
     assert(p1->active);
 
@@ -44,11 +46,17 @@ GameLoopAction gl_run_frame(GameContext *context) {
 
         if (!context->paused) {
             result_action = gameplay_step_frame(context);
-            st_write_hex(VDP_CURRENT_RASTER_Y, 64, 8);
+
+            if (show_raster_counter) {
+                st_write_hex(VDP_CURRENT_RASTER_Y, 64, 8);
+            }
         }
     } else {
         result_action = credits_step_frame(context);
-        st_write_hex(VDP_CURRENT_RASTER_Y, 64, 8);
+
+        if (show_raster_counter) {
+            st_write_hex(VDP_CURRENT_RASTER_Y, 64, 8);
+        }
     }
 
     // Finished entire frame worth of processing hopefully before the cutoff line

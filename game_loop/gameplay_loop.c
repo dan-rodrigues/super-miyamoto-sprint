@@ -95,14 +95,16 @@ static void end_state_check(GameContext *context) {
     // Reload level when hero dies..
     if (hero->death_sequence_complete) {
         const uint8_t death_fade_delay = 20;
-        ExtraTask *task = level_reload_sequence_task_init(death_fade_delay);
+        ExtraTask *task = level_reload_sequence_task_init(death_fade_delay, true);
         context->current_fade_handle = task->handle;
     }
 
     // Roll credits when goal is reached..
     if (hero->goal_reached) {
-        ExtraTask *task = level_reload_sequence_task_init(60);
+        const uint8_t credits_fade_delay = 30;
+        ExtraTask *task = level_reload_sequence_task_init(credits_fade_delay, false);
         task->level_reload_sequence.final_action = GL_ACTION_SHOW_CREDITS;
+        task->level_reload_sequence.play_credits_music = true;
         context->current_fade_handle = task->handle;
     }
 }
