@@ -18,6 +18,7 @@
 #include "camera_init.h"
 #include "hero_init.h"
 #include "block_map_table.h"
+#include "sprite_loading_init.h"
 
 #include "bg_hills_no_clouds.h"
 #include "bg_hills_clouds.h"
@@ -39,7 +40,11 @@ void level_init(const LevelAttributes *attributes, GameContext *context) {
 
     hero_level_init(p1->hero, attributes, p1->max_life, p1->midpoint_reached);
     camera_init(p1->camera, p1->hero, block_map_table);
-    sprite_level_data_perform_initial_load(p1->camera, p1->hero);
+
+    // Sprite level data setup
+
+    sprite_level_data_init(p1->sprite_context, attributes->sprite_data, *attributes->sprite_data_length);
+    sprite_level_data_perform_initial_load(p1->sprite_context, p1->camera, p1->hero);
 
     dbg_print_init();
 
@@ -138,10 +143,6 @@ void level_load(const LevelAttributes *attributes) {
     // Load level into RAM
 
     block_load_level(attributes->block_data, attributes->stride);
-
-    // Sprite level data setup
-
-    sprite_level_data_init(attributes->sprite_data, *attributes->sprite_data_length);
 
     // Initial animation frames since they may not be visible immediately otherwise
     

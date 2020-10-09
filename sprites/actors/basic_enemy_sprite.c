@@ -24,11 +24,11 @@ void basic_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
             sa_free(self);
             return;
         }
-    } else if (sa_hero_standard_collision(self, env->hero) == SA_HERO_COLLISION_STOMP) {
+    } else if (sa_hero_standard_collision(self, env) == SA_HERO_COLLISION_STOMP) {
         sub->squished = true;
     }
 
-    sa_other_sprite_collision(self);
+    sa_other_sprite_collision(self, env);
 
     draw(self, env);
 }

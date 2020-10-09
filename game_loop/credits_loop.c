@@ -35,7 +35,7 @@ GameLoopAction credits_step_frame(GameContext *context) {
 
     state_update(context);
 
-    CreditsState state = credits_context->credits_state;
+    CreditsState state = credits_context->state;
     bool sprites_over_affine = (
         state == CREDITS_STATE_FADE_IN_TECH ||
         state == CREDITS_STATE_DISPLAYING_TECH ||
@@ -92,7 +92,7 @@ static void exiting_state_transition(GameContext *context, CreditsState new_stat
         return;
     }
 
-    if (context->credits.credits_state_counter >= delay) {
+    if (context->credits.state_counter >= delay) {
         state_transition(context, new_state);
     }
 }
@@ -102,11 +102,11 @@ static void state_update(GameContext *context) {
     const uint16_t display_delay = 60 * 10;
     const uint16_t dismiss_delay = 60 * 2;
 
-    uint32_t state_counter = context->credits.credits_state_counter++;
+    uint32_t state_counter = context->credits.state_counter++;
 
-    switch (context->credits.credits_state) {
+    switch (context->credits.state) {
         case CREDITS_STATE_INITIAL_DELAY:
-            if (context->credits.credits_state_counter >= initial_delay) {
+            if (context->credits.state_counter >= initial_delay) {
                 state_transition(context, CREDITS_STATE_FADE_IN_TECH);
             }
             break;
@@ -177,8 +177,8 @@ static void state_transition(GameContext *context, CreditsState new_state) {
     }
 
     CreditsContext *credits_context = &context->credits;
-    credits_context->credits_state = new_state;
-    credits_context->credits_state_counter = 0;
+    credits_context->state = new_state;
+    credits_context->state_counter = 0;
 
     // Keep the current text on screen if exiting
     if (new_state != CREDITS_STATE_FADE_OUT_TEXT) {

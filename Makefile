@@ -92,6 +92,7 @@ CPU_SLOW_SOURCES := \
 	palette/palette_init.c \
 	level/level_loading.c \
 	level/camera_init.c \
+	sprites/sprite_loading_init.c \
 	hero/hero_init.c
 
 CPU_SLOW_SOURCES += $(addprefix $(ICS32_SW_DIR)common/, \

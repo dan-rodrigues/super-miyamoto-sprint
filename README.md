@@ -1,10 +1,14 @@
 # Super Miyamoto Sprint (WIP)
 
-This is a simple retro-inspired platformer game (implemented in C11) targetting a [retro-inspired FPGA game](https://github.com/dan-rodrigues/icestation-32) console by the same author (implemented in Verilog).
+This is a simple retro-inspired platformer game (implemented in C11) targetting a [retro-inspired FPGA game](https://github.com/dan-rodrigues/icestation-32) console by the same author (implemented in Verilog). It uses sprites and tilemaps to displays graphics similar to other games of the period and works with modest CPU speed and RAM.
 
-It's mostly incomplete and what is available here is a playable "sandbox".
+One complete level is playable.
 
 ![Photo](photo/demo.jpg)
+
+## Binaries
+
+TODO
 
 ## Prerequisites
 
@@ -76,6 +80,18 @@ make MUSIC=1 icebreaker_prog
 ## Controls
 
 The game can be controlled with (limited) buttons on the FPGA board or with certain USB gamepads. Top level verilog modules for each board show which options are available if any. The simulator uses SDL keyboard input for control.
+
+* Left/Right: Move
+* Up: Climb
+* Down: Duck
+* B: Jump
+* Y: Run
+* L: Exit vehicle*
+* R: Perform vehicele action (like firing a projectile)*
+* Select: Reset game state (debug)*
+* Start: Pause*
+
+*: USB gamepad is needed for these.
 
 ## Acknowledgements
 

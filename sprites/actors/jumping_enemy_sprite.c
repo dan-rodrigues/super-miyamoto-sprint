@@ -33,8 +33,8 @@ void jumping_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) 
             }
         }
 
-        sa_hero_standard_collision(self, env->hero);
-        sa_other_sprite_collision(self);
+        sa_hero_standard_collision(self, env);
+        sa_other_sprite_collision(self, env);
     } else {
         sub->grounded = false;
     }

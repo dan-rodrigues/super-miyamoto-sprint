@@ -67,7 +67,7 @@ GameLoopAction gl_run_frame(GameContext *context) {
         gameplay_frame_ended_update(context);
         vcq_run();
     } else {
-        credits_frame_ended_update(context->credits.credits_state);
+        credits_frame_ended_update(context->credits.state);
         sb_upload();
     }
 
@@ -84,7 +84,11 @@ GameLoopAction gl_run_frame(GameContext *context) {
     return result_action;
 }
 
-void gl_reset_context(GameContext *context, Hero *hero, Camera *camera) {
+void gl_reset_context(GameContext *context,
+                      Hero *hero,
+                      Camera *camera,
+                      SpriteLoadingContext *sprite_context)
+{
     const GameContext context_initialized = {
         .players = {
             {
@@ -93,7 +97,8 @@ void gl_reset_context(GameContext *context, Hero *hero, Camera *camera) {
                 .camera = camera,
                 .active = true,
                 .midpoint_reached = false,
-                .max_life = HERO_DEFAULT_LIFE
+                .max_life = HERO_DEFAULT_LIFE,
+                .sprite_context = sprite_context
             }
         },
         .paused = false,

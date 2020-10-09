@@ -197,28 +197,6 @@ static void draw_8x8(uint8_t base_x, uint8_t base_y, const uint16_t *data) {
     }
 }
 
-// Compact but slow divide in place of the large one in libgcc
-// It is not used in any hot function
-static uint32_t basic_divide(uint32_t dividend, uint32_t divisor) {
-    uint32_t quotient = 0;
-    uint32_t quotient_mask = 1 << 31;
-
-    uint64_t divisor_64 = ((uint64_t)divisor) << 31;
-    uint64_t dividend_64 = dividend;
-
-    while (quotient_mask) {
-        if (divisor_64 <= dividend_64) {
-            dividend_64 -= divisor_64;
-            quotient |= quotient_mask;
-        }
-
-        divisor_64 >>= 1;
-        quotient_mask >>= 1;
-    }
-
-    return quotient;
-}
-
 // Quick and dirty bodge to get 480 lines worth of perspective scales.
 // This works for the silly effect on the credits screen. It is not used for gameplay.
 //
@@ -230,7 +208,7 @@ static void precompute_scale_table() {
     const uint16_t base_divisor = 0x270;
 
     for (uint32_t i = 0; i < SCREEN_ACTIVE_HEIGHT; i++) {
-        scale_table[i] = basic_divide(AFFINE_Q_1 << exp, base_divisor + i * 4);
+        scale_table[i] = (AFFINE_Q_1 << exp) / (base_divisor + i * 4);
     }
 }
 

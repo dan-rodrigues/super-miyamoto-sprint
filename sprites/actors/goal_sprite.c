@@ -12,7 +12,7 @@
 static void draw(const SpriteActor *self, const SpriteEnvironment *env);
 
 void goal_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
-    if (sa_hero_standard_collision(self, env->hero)) {
+    if (sa_hero_standard_collision(self, env)) {
         hero_mark_goal_reached(env->hero);
         sa_free(self);
 

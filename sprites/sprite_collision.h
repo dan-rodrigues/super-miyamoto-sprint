@@ -22,14 +22,14 @@ enum SpriteHeroCollisionResult {
 bool sa_has_collision(const SpriteActor *s1, const SpriteActor *s2);
 bool sa_has_hero_collision(const SpriteActor *actor, const Hero *hero);
 
-SpriteHeroCollisionResult sa_hero_standard_collision(SpriteActor *actor, Hero *hero);
+SpriteHeroCollisionResult sa_hero_standard_collision(SpriteActor *actor, const SpriteEnvironment *env);
 
-bool sa_other_sprite_collision(SpriteActor *actor);
+bool sa_other_sprite_collision(SpriteActor *actor, const SpriteEnvironment *env);
 void sa_other_sprite_platform_check(SpriteActor *platform);
 
-bool sa_light_sprite_collision(SpriteActorLight *actor);
+bool sa_light_sprite_collision(SpriteActorLight *actor, const SpriteEnvironment *env);
 bool sa_hero_standard_collision_light(SpriteActorLight *actor, Hero *hero);
 
-void sa_kill_sprite(SpriteActor *actor);
+void sa_kill_sprite(SpriteActor *actor, const SpriteEnvironment *env);
 
 #endif /* sprite_collision_h */

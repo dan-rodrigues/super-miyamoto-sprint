@@ -15,7 +15,7 @@ static bool has_collision_1_abs(const SpriteBoundingBoxAbs *p1,
 static bool has_collision_2_abs(const SpriteBoundingBoxAbs *p1,
                                 const SpriteBoundingBoxAbs *p2);
 
-static void projectile_kill(SpriteActor *actor);
+static void projectile_kill(SpriteActor *actor, const SpriteEnvironment *env);
 
 bool sa_has_hero_collision(const SpriteActor *actor, const Hero *hero) {
     if (hero->dead) {
@@ -32,7 +32,9 @@ bool sa_has_collision(const SpriteActor *s1, const SpriteActor *s2) {
     return has_collision(&s1->position, &b1, &s2->position, &b2);
 }
 
-SpriteHeroCollisionResult sa_hero_standard_collision(SpriteActor *actor, Hero *hero) {
+SpriteHeroCollisionResult sa_hero_standard_collision(SpriteActor *actor, const SpriteEnvironment *env) {
+    Hero *hero = env->hero;
+
     HeroSpriteCarryUpdateResult carry_result = hero_sprite_carry_update(hero, actor);
     bool carrying = (carry_result == HERO_SPRITE_CARRY_UPDATE_CARRYING);
 
@@ -75,7 +77,7 @@ SpriteHeroCollisionResult sa_hero_standard_collision(SpriteActor *actor, Hero *h
         // Hero wins
 
         if (actor->dies_upon_stomp) {
-            sa_kill_sprite(actor);
+            sa_kill_sprite(actor, env);
         }
 
         hero_set_airborne_bounce(hero);
@@ -98,9 +100,9 @@ SpriteHeroCollisionResult sa_hero_standard_collision(SpriteActor *actor, Hero *h
     }
 }
 
-void sa_kill_sprite(SpriteActor *actor) {
+void sa_kill_sprite(SpriteActor *actor, const SpriteEnvironment *env) {
     actor->killed = true;
-    sprite_level_data_prevent_index_reloading(actor->level_data_index);
+    sprite_level_data_prevent_index_reloading(env->loading_context, actor->level_data_index);
 }
 
 // Handle platform ride flag setting for other sprites
@@ -138,7 +140,7 @@ void sa_other_sprite_platform_check(SpriteActor *platform) {
 // Handle sprite-to-sprite collision assuming the caller is "solid"
 // This allows sprites to bump into each other and turn away
 
-bool sa_other_sprite_collision(SpriteActor *actor) {
+bool sa_other_sprite_collision(SpriteActor *actor, const SpriteEnvironment *env) {
     if (actor->killed || !actor->interacts_with_sprites) {
         return false;
     }
@@ -170,13 +172,13 @@ bool sa_other_sprite_collision(SpriteActor *actor) {
 
             impact_sprite_init(&overlap_center);
 
-            projectile_kill(other);
+            projectile_kill(other, env);
             se_stomp();
 
             // If the other sprite is also killer, this one dies too
             // Some sprites may be carryable but not killed in this case
             if (actor->carried || other->carried || other->kills_other_sprites) {
-                projectile_kill(actor);
+                projectile_kill(actor, env);
             }
 
             continue;
@@ -215,7 +217,7 @@ bool sa_other_sprite_collision(SpriteActor *actor) {
     return false;
 }
 
-bool sa_light_sprite_collision(SpriteActorLight *actor) {
+bool sa_light_sprite_collision(SpriteActorLight *actor, const SpriteEnvironment *env) {
     // Precompute caller's absolute bounding box
     SpriteBoundingBoxAbs box_abs;
     sa_bounding_box_abs(&actor->position, &actor->bounding_box, &box_abs);
@@ -232,7 +234,7 @@ bool sa_light_sprite_collision(SpriteActorLight *actor) {
             continue;
         }
 
-        projectile_kill(other);
+        projectile_kill(other, env);
 
         return true;
     }
@@ -291,10 +293,10 @@ static bool has_collision_2_abs(const SpriteBoundingBoxAbs *p1,
         p1->bottom > p2->top;
 }
 
-static void projectile_kill(SpriteActor *actor) {
+static void projectile_kill(SpriteActor *actor, const SpriteEnvironment *env) {
     const int32_t kill_launch_speed = Q_1;
     actor->velocity.y = -kill_launch_speed;
 
     actor->falls_off_when_killed = true;
-    sa_kill_sprite(actor);
+    sa_kill_sprite(actor, env);
 }

@@ -43,7 +43,7 @@ void missile_sprite_main(SpriteActorLight *self, const SpriteEnvironment *env) {
 
     // Sprite collision
 
-    if (sa_light_sprite_collision(self)) {
+    if (sa_light_sprite_collision(self, env)) {
         explode(self);
         return;
     }

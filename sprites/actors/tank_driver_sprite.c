@@ -13,7 +13,7 @@ void tank_driver_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
         return;
     }
 
-    sa_hero_standard_collision(self, env->hero);
+    sa_hero_standard_collision(self, env);
     sa_perform_default_movement(self);
     draw(self, env);
 }

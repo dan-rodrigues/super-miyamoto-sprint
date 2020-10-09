@@ -43,9 +43,9 @@ void tank_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
         move(self);
         position_driver(self, sub);
 
-        sa_hero_standard_collision(self, hero);
+        sa_hero_standard_collision(self, env);
 
-        sa_other_sprite_collision(self);
+        sa_other_sprite_collision(self, env);
     } else {
         // Hero can enter it
 
@@ -59,7 +59,7 @@ void tank_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
         }
 
         bool hero_should_enter = !hero_in_any_vehicle(hero);
-        hero_should_enter &= (sa_hero_standard_collision(self, hero) != SA_HERO_COLLISION_NONE);
+        hero_should_enter &= (sa_hero_standard_collision(self, env) != SA_HERO_COLLISION_NONE);
         hero_should_enter &= !sub->hero_collision_grace;
         hero_should_enter &= hero->velocity.y > 0;
         hero_should_enter &= hero->position.y < self->position.y;
@@ -69,7 +69,7 @@ void tank_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
             hero->velocity.x = 0;
         }
 
-        sa_other_sprite_collision(self);
+        sa_other_sprite_collision(self, env);
     }
 
     self->can_ride = !hero_driving;

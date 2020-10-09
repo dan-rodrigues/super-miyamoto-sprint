@@ -22,6 +22,7 @@
 #include "jetpack_enemy_sprite.h"
 #include "goal_sprite.h"
 #include "midpoint_sprite.h"
+#include "sprite_loading_types.h"
 
 #define SPRITE_ACTOR_MAX 32
 #define SPRITE_ACTOR_LIGHT_MAX 48
@@ -86,6 +87,7 @@ struct SpriteActor {
 
 struct SpriteEnvironment {
     const Camera *camera;
+    SpriteLoadingContext *loading_context;
 
     // There is only one Hero for now
     // This may be extended later if a sprite must interact with multiple Hero instances

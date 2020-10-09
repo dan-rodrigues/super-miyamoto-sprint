@@ -10,6 +10,7 @@
 #include "extra_task_handle.h"
 #include "affine.h"
 #include "level_attributes.h"
+#include "sprite_loading_types.h"
 
 enum CreditsState {
     CREDITS_STATE_INITIAL_DELAY,
@@ -34,14 +35,15 @@ enum GameLoopAction {
 
 struct CreditsContext {
     AffineHeroContext affine_context;
-    CreditsState credits_state;
-    uint16_t credits_state_counter;
+    CreditsState state;
+    uint16_t state_counter;
     bool showing_tech_attributions;
 };
 
 struct PlayerContext {
     Hero *hero;
     Camera *camera;
+    SpriteLoadingContext *sprite_context;
     bool active;
 
     uint8_t max_life;
@@ -59,7 +61,11 @@ struct GameContext {
     ExtraTaskHandle current_fade_handle;
 };
 
-void gl_reset_context(GameContext *context, Hero *hero, Camera *camera);
+void gl_reset_context(GameContext *context,
+                      Hero *hero,
+                      Camera *camera,
+                      SpriteLoadingContext *sprite_context);
+
 void gl_load_credits(const LevelAttributes *base_level, GameContext *context);
 
 GameLoopAction gl_run_frame(GameContext *context);

@@ -15,9 +15,9 @@ void layered_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) 
 
     // Hero interaction
 
-    if (!self->killed && (sa_hero_standard_collision(self, env->hero) == SA_HERO_COLLISION_STOMP)) {
+    if (!self->killed && (sa_hero_standard_collision(self, env) == SA_HERO_COLLISION_STOMP)) {
         if (sub->small) {
-            sa_kill_sprite(self);
+            sa_kill_sprite(self, env);
         } else {
             // Sprite shrinks to its smaller size when initially stomped
             sub->small = true;
@@ -25,7 +25,7 @@ void layered_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) 
         }
     }
 
-    sa_other_sprite_collision(self);
+    sa_other_sprite_collision(self, env);
 
     draw(self, env);
 }

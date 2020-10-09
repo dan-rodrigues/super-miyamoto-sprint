@@ -43,8 +43,8 @@ void jetpack_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) 
             self->velocity.y = MIN(fall_max_speed, self->velocity.y);
         }
 
-        sa_hero_standard_collision(self, env->hero);
-        sa_other_sprite_collision(self);
+        sa_hero_standard_collision(self, env);
+        sa_other_sprite_collision(self, env);
     }
 
     draw(self, sub, env);

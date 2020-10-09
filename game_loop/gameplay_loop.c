@@ -16,6 +16,7 @@
 #include "debug_playfield.h"
 #include "block_map_table.h"
 #include "vram_command_queue.h"
+#include "sprite_loading_types.h"
 
 static void enable_display(bool alpha_enabled, bool alpha_enable_sprites);
 static void end_state_check(GameContext *context);
@@ -27,7 +28,8 @@ GameLoopAction gameplay_step_frame(GameContext *context) {
 
     const SpriteEnvironment sprite_draw_context = {
         .camera = camera,
-        .hero = hero
+        .hero = hero,
+        .loading_context = p1->sprite_context
     };
 
     // 1. Run rideable sprites before anything else (including Hero)
@@ -40,7 +42,7 @@ GameLoopAction gameplay_step_frame(GameContext *context) {
     sa_run_deferred_draw_tasks(&sprite_draw_context);
 
     // Sprite loading, if needed
-    sprite_level_data_load_new(camera, hero);
+    sprite_level_data_load_new(p1->sprite_context, camera, hero);
 
     // Note camera must be updated before any sprite drawing happens
     // There's "jitter" otherwise as camera / sprites don't appear in sync

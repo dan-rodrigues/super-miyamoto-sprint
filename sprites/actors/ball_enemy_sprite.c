@@ -42,12 +42,12 @@ void ball_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
 
                 self->velocity.x = sa_velocity_from_speed(walk_speed, self->direction);
 
-                if (sa_hero_standard_collision(self, env->hero) == SA_HERO_COLLISION_STOMP) {
+                if (sa_hero_standard_collision(self, env) == SA_HERO_COLLISION_STOMP) {
                     sub->state = BALL_ENEMY_CURLED;
                 }
             } break;
             case BALL_ENEMY_ROLLING: {
-                if (!suppress_hero_collision && sa_hero_standard_collision(self, env->hero) == SA_HERO_COLLISION_STOMP) {
+                if (!suppress_hero_collision && sa_hero_standard_collision(self, env) == SA_HERO_COLLISION_STOMP) {
                     self->velocity.x = 0;
                     sub->state = BALL_ENEMY_CURLED;
                 } else {
@@ -58,7 +58,7 @@ void ball_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
                 if (!suppress_hero_collision) {
                     // This carry interaction block may be useful to other carry sprites
                     // Could extract if other sprites requirements end up being similar enough
-                    SpriteHeroCollisionResult result = sa_hero_standard_collision(self, env->hero);
+                    SpriteHeroCollisionResult result = sa_hero_standard_collision(self, env);
                     
                     switch (result) {
                         case SA_HERO_COLLISION_CARRIED_KICK:
@@ -110,7 +110,7 @@ void ball_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
             sub->ball_animation_index = 0;
         }
 
-        sa_other_sprite_collision(self);
+        sa_other_sprite_collision(self, env);
     }
 
     draw(self, env);
