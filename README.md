@@ -8,7 +8,7 @@ One complete level is playable.
 
 ## Binaries
 
-FPGA bitstreams and game binaries for the program can be downloaded from the [Releases](/releases/latest) page. The game should start after flashing the bitstream.
+FPGA bitstreams and game binaries for the program can be downloaded from the [Releases](https://github.com/dan-rodrigues/super-miyamoto-sprint/releases) page. The game should start after flashing the bitstream.
 
 ### Flashing to iCEBreaker
 
