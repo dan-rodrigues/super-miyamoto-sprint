@@ -41,3 +41,7 @@
 /ASSERT_ENABLED
 /DEBUG_PRINT
 
+# Project
+
+/*.xcodeproj
+
