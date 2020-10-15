@@ -99,21 +99,21 @@ static void platform_deferred_draw(SpriteActor *self, const SpriteEnvironment *e
     static const SpriteDrawParams params[] = {
         {
             .tile = 0x022,
-            .offset_x = -16, .offset_y = -17,
+            .offset_x = -16, .offset_y = -16,
             .palette = 9,
             .wide = true, .tall = true,
             .x_flip = false, .y_flip = false
         },
         {
             .tile = 0x023,
-            .offset_x = -8, .offset_y = -17,
+            .offset_x = -8, .offset_y = -16,
             .palette = 9,
             .wide = true, .tall = true,
             .x_flip = false, .y_flip = false
         },
         {
             .tile = 0x024,
-            .offset_x = -8, .offset_y = -17,
+            .offset_x = -8, .offset_y = -16,
             .palette = 9,
             .wide = true, .tall = true,
             .x_flip = false, .y_flip = false

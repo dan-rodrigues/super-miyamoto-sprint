@@ -40,7 +40,7 @@ static void sa_draw_standard_16x16_impl(const SpritePosition *position,
 void sa_draw_standard_16x16(const SpriteActor *self, const SpriteEnvironment *env, uint16_t tile, uint8_t palette) {
     SpriteDrawParams params = {
         .offset_x = -8,
-        .offset_y = -17,
+        .offset_y = -16,
         .palette = palette,
         .tile = tile,
         .wide = true, .tall = true,
@@ -129,7 +129,7 @@ static void sa_draw_standard_16x16_impl(const SpritePosition *position,
 {
     SpriteDrawParams params = {
         .offset_x = -8,
-        .offset_y = -17,
+        .offset_y = -16,
         .palette = palette,
         .tile = tile,
         .wide = true, .tall = true,

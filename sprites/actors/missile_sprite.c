@@ -20,8 +20,8 @@ void missile_sprite_main(SpriteActorLight *self, const SpriteEnvironment *env) {
 
     // Block collision
 
-    const SpriteOffset missile_head_offset_left = { 0, -8 };
-    const SpriteOffset missile_head_offset_right = { 7, -8 };
+    const SpriteOffset missile_head_offset_left = { -2, -8 };
+    const SpriteOffset missile_head_offset_right = { 5, -8 };
 
     const SpriteOffset missile_head_offset = (self->direction == LEFT
                                               ? missile_head_offset_left : missile_head_offset_right);

@@ -58,7 +58,7 @@ static const HeroFrameLayout hero_frames[] = {
     { 0, 1, { 0x06c, 0x08c, -1 }, standard_offsets, { 0, 0 } },
 
     { 2, 0, { 0x062, 0x0e0, 0x2c6 }, kick_frame_offsets, { 0, 0 } },
-    { 6, 0, { 0x004, 0x0e0, -1 }, driving_offsets, { 0, 0 } },
+    { 6, 0, { 0x004, 0x0e0, -1 }, driving_offsets, { 0, 1 } },
 
     { 2, 0, { 0x008, 0x2c4, -1 }, standard_offsets, { 0, 0 } },
 
@@ -103,8 +103,8 @@ void hero_draw(Hero *hero, int16_t sprite_tile, const Camera *camera) {
 
     const HeroFrameLayout *sprite_frame = &hero_frames[hero->frame];
 
-    const int16_t x_offset = -11;
-    const int16_t y_offset = -17;
+    const int16_t x_offset = -9;
+    const int16_t y_offset = -16;
 
     int32_t sprite_y = hero->position.y + y_offset - camera->scroll.y;
     int32_t tile_y = sprite_y;

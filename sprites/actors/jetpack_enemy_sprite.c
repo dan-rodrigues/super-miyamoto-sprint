@@ -56,7 +56,7 @@ static void move(SpriteActor *self, JetpackEnemySprite *sub) {
     }
 
     static const SpriteBoundingBox horizontal_box = {
-        .offset = { -5, -8 },
+        .offset = { -7, -8 },
         .size = { 13, 4 }
     };
 

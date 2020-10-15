@@ -36,7 +36,7 @@ static void move(SpriteActor *self) {
     }
 
     static const SpriteBoundingBox horizontal_box = {
-        .offset = { -5, -10 },
+        .offset = { -7, -10 },
         .size = { 12, 6 }
     };
 
@@ -64,14 +64,14 @@ static void draw(SpriteActor *self, const SpriteEnvironment *env) {
         {
             {
                 .tile = 0x0c0,
-                .offset_x = -8, .offset_y = -17,
+                .offset_x = -8, .offset_y = -16,
                 .palette = 11,
                 .wide = true, .tall = true,
                 .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x0c8,
-                .offset_x = -8, .offset_y = -17 - 15,
+                .offset_x = -8, .offset_y = -16 - 15,
                 .palette = 11,
                 .wide = true, .tall = true,
                 .x_flip = false, .y_flip = false
@@ -80,14 +80,14 @@ static void draw(SpriteActor *self, const SpriteEnvironment *env) {
         {
             {
                  .tile = 0x0c2,
-                 .offset_x = -8, .offset_y = -17,
+                 .offset_x = -8, .offset_y = -16,
                  .palette = 11,
                  .wide = true, .tall = true,
                  .x_flip = false, .y_flip = false
              },
              {
                  .tile = 0x0c8,
-                 .offset_x = -8, .offset_y = -17 - 16,
+                 .offset_x = -8, .offset_y = -16 - 16,
                  .palette = 11,
                  .wide = true, .tall = true,
                  .x_flip = false, .y_flip = false
@@ -99,14 +99,14 @@ static void draw(SpriteActor *self, const SpriteEnvironment *env) {
     static const SpriteDrawParams small_params[] = {
         {
             .tile = 0x0c4,
-            .offset_x = -8, .offset_y = -17,
+            .offset_x = -8, .offset_y = -16,
             .palette = 11,
             .wide = true, .tall = true,
             .x_flip = false, .y_flip = false
         },
         {
             .tile = 0x0c6,
-            .offset_x = -8, .offset_y = -17,
+            .offset_x = -8, .offset_y = -16,
             .palette = 11,
             .wide = true, .tall = true,
             .x_flip = false, .y_flip = false
