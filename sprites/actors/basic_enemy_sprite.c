@@ -41,7 +41,7 @@ static void move(SpriteActor *self) {
     }
 
     static const SpriteBoundingBox horizontal_box = {
-        .offset = { -5, -10 },
+        .offset = { -6, -10 },
         .size = { 12, 6 }
     };
 

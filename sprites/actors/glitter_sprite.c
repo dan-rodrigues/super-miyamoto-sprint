@@ -29,66 +29,66 @@ static const SpriteDrawParams *draw_params(uint8_t lifetime_step) {
         {
             {
                 .tile = 0x20,
-                .offset_x = -8 + 4, .offset_y = -17 + 5,
+                .offset_x = -8 + 4, .offset_y = -16 + 5,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x20,
-                .offset_x = -8, .offset_y = -17 + 9,
+                .offset_x = -8, .offset_y = -16 + 9,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x20,
-                .offset_x = -8 + 8, .offset_y = -17 + 12,
+                .offset_x = -8 + 8, .offset_y = -16 + 12,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x20,
-                .offset_x = -8 + 3, .offset_y = -17 + 15,
+                .offset_x = -8 + 3, .offset_y = -16 + 15,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             }
         },
         {
             {
                 .tile = 0x21,
-                .offset_x = -8 + 4, .offset_y = -17 + 5,
+                .offset_x = -8 + 4, .offset_y = -16 + 5,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x21,
-                .offset_x = -8, .offset_y = -17 + 9,
+                .offset_x = -8, .offset_y = -16 + 9,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x21,
-                .offset_x = -8 + 8, .offset_y = -17 + 12,
+                .offset_x = -8 + 8, .offset_y = -16 + 12,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x21,
-                .offset_x = -8 + 3, .offset_y = -17 + 15,
+                .offset_x = -8 + 3, .offset_y = -16 + 15,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             }
         },
         {
             {
                 .tile = 0x30,
-                .offset_x = -8 + 4, .offset_y = -17 + 5,
+                .offset_x = -8 + 4, .offset_y = -16 + 5,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x30,
-                .offset_x = -8, .offset_y = -17 + 9,
+                .offset_x = -8, .offset_y = -16 + 9,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x30,
-                .offset_x = -8 + 8, .offset_y = -17 + 12,
+                .offset_x = -8 + 8, .offset_y = -16 + 12,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x30,
-                .offset_x = -8 + 3, .offset_y = -17 + 15,
+                .offset_x = -8 + 3, .offset_y = -16 + 15,
                 .palette = 9, .wide = false, .tall = false, .x_flip = false, .y_flip = false
             }
         },

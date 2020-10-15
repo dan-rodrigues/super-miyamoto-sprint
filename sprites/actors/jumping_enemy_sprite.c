@@ -48,8 +48,8 @@ static void move(SpriteActor *self, JumpingEnemySprite *sub) {
     }
 
     static const SpriteBoundingBox horizontal_box = {
-        .offset = { -6, -8 },
-        .size = { 14, 4 }
+        .offset = { -7, -8 },
+        .size = { 13, 4 }
     };
 
     static const SpriteBoundingBox vertical_box = {

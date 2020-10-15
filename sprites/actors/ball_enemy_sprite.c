@@ -23,7 +23,7 @@ void ball_enemy_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
     move(self, env->hero);
 
     // This is important to stop hero getting hurt when falling onto the ball
-    const uint8_t hero_collision_grace_default = 9;
+    const uint8_t hero_collision_grace_default = 15;
 
     if (sub->hero_collision_grace) {
         sub->hero_collision_grace--;
@@ -125,7 +125,7 @@ static void move(SpriteActor *self, const Hero *hero) {
     }
 
     static const SpriteBoundingBox horizontal_box = {
-        .offset = { -6, -8 },
+        .offset = { -7, -8 },
         .size = { 14, 4 }
     };
 
@@ -174,7 +174,7 @@ static void draw_ball(SpriteActor *self, const SpriteEnvironment *env) {
 
     SpriteDrawParams params = {
         .offset_x = -8,
-        .offset_y = -17,
+        .offset_y = -16,
         .palette = 10,
         .tile = ball_tiles[sub->ball_animation_index],
         .wide = true, .tall = true,

@@ -207,7 +207,7 @@ void tank_sprite_hero_drive_update(SpriteActor *self, Hero *hero, SpriteVehicleH
 
     static const SpriteBoundingBox horizontal_box = {
         .offset = { -11, -12 },
-        .size = { 23, 8 }
+        .size = { 22, 8 }
     };
 
     static const SpriteBoundingBox vertical_box = {
@@ -226,8 +226,8 @@ void tank_sprite_hero_drive_update(SpriteActor *self, Hero *hero, SpriteVehicleH
     };
 
     static const SpriteBoundingBox hero_vertical_box = {
-        .offset = { -4, -24 },
-        .size = { 10, 24 }
+        .offset = { -4, -26 },
+        .size = { 8, 26 }
     };
 
     hero_context->horizontal_block_boxes[1] = hero_horizontal_box;
@@ -385,7 +385,7 @@ static void enemy_driver_update(SpriteActor *self, TankSprite *sub, const Hero *
 static void position_driver(SpriteActor *self, TankSprite *sub) {
     SpriteActor *driver = sa_get(sub->driver_enemy_handle);
 
-    const SpriteOffset driver_offset = { 3, -18 };
+    const SpriteOffset driver_offset = { 3, -17 };
     driver->position = self->position;
     sa_apply_offset_flip(&driver_offset, &driver->position, self->direction);
 
@@ -442,14 +442,14 @@ static void draw(const SpriteActor *self, TankSprite *sub, const SpriteEnvironme
         {
             {
                 .tile = 0x102,
-                .offset_x = -12, .offset_y = -19,
+                .offset_x = -12, .offset_y = -17,
                 .palette = 12,
                 .wide = true, .tall = true,
                 .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x103,
-                .offset_x = -12 + 8, .offset_y = -19,
+                .offset_x = -12 + 8, .offset_y = -17,
                 .palette = 12,
                 .wide = true, .tall = true,
                 .x_flip = false, .y_flip = false
@@ -458,14 +458,14 @@ static void draw(const SpriteActor *self, TankSprite *sub, const SpriteEnvironme
         {
             {
                 .tile = 0x10a,
-                .offset_x = -12, .offset_y = -19,
+                .offset_x = -12, .offset_y = -17,
                 .palette = 12,
                 .wide = true, .tall = true,
                 .x_flip = false, .y_flip = false
             },
             {
                 .tile = 0x10b,
-                .offset_x = -12 + 8, .offset_y = -19,
+                .offset_x = -12 + 8, .offset_y = -17,
                 .palette = 12,
                 .wide = true, .tall = true,
                 .x_flip = false, .y_flip = false
@@ -477,28 +477,28 @@ static void draw(const SpriteActor *self, TankSprite *sub, const SpriteEnvironme
         // Bottom (tracks)
         {
             .tile = 0x105,
-            .offset_x = -12 + 8, .offset_y = -19 + 16,
+            .offset_x = -12 + 8, .offset_y = -17 + 16,
             .palette = 12,
             .wide = false, .tall = false,
             .x_flip = false, .y_flip = false
         },
         {
             .tile = 0x105,
-            .offset_x = -12 + 0, .offset_y = -19 + 16,
+            .offset_x = -12 + 0, .offset_y = -17 + 16,
             .palette = 12,
             .wide = false, .tall = false,
             .x_flip = false, .y_flip = false
         },
         {
             .tile = 0x117,
-            .offset_x = -12 + 8, .offset_y = -19 + 16,
+            .offset_x = -12 + 8, .offset_y = -17 + 16,
             .palette = 12,
             .wide = false, .tall = false,
             .x_flip = false, .y_flip = false
         },
         {
             .tile = 0x115,
-            .offset_x = -12 + 16, .offset_y = -19 + 16,
+            .offset_x = -12 + 16, .offset_y = -17 + 16,
             .palette = 12,
             .wide = false, .tall = false,
             .x_flip = false, .y_flip = false
@@ -506,21 +506,21 @@ static void draw(const SpriteActor *self, TankSprite *sub, const SpriteEnvironme
         // Exhaust
         {
             .tile = 0x107,
-            .offset_x = -12 + 24, .offset_y = -19 + 12,
+            .offset_x = -12 + 24, .offset_y = -17 + 12,
             .palette = 12,
             .wide = false, .tall = false,
             .x_flip = false, .y_flip = false
         },
         {
             .tile = 0x116,
-            .offset_x = -12 + 24, .offset_y = -19 + 4,
+            .offset_x = -12 + 24, .offset_y = -17 + 4,
             .palette = 12,
             .wide = false, .tall = false,
             .x_flip = false, .y_flip = false
         },
         {
             .tile = 0x106,
-            .offset_x = -12 + 24, .offset_y = -19 - 4,
+            .offset_x = -12 + 24, .offset_y = -17 - 4,
             .palette = 12,
             .wide = false, .tall = false,
             .x_flip = false, .y_flip = false

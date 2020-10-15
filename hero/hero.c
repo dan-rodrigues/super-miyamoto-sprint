@@ -507,13 +507,13 @@ static void horizontal_block_displacement(Hero *hero, const SpriteBlockInteracti
 
 const SpriteBoundingBox *hero_sprite_bounding_box(const Hero *hero) {
     static const SpriteBoundingBox standing_box = {
-        .offset = { -8, -24},
-        .size = { 12, 24}
+        .offset = { -6, -24 },
+        .size = { 12, 24 }
     };
 
     static const SpriteBoundingBox ducking_box = {
-        .offset = { -8, -16},
-        .size = { 12, 16}
+        .offset = { -6, -16 },
+        .size = { 12, 16 }
     };
 
     return (hero->ducking ? &ducking_box : &standing_box);
@@ -539,8 +539,8 @@ static const SpriteBoundingBox *block_horizontal_bounding_box(const Hero *hero) 
 
 static const SpriteBoundingBox *block_vertical_bounding_box(const Hero *hero) {
     static const SpriteBoundingBox full_size_box = {
-        .offset = { -4, -24 },
-        .size = {4 + 3, 24 }
+        .offset = { -4, -26 },
+        .size = { 4 + 3, 26 }
     };
 
     static const SpriteBoundingBox ducking_box = {
@@ -640,18 +640,12 @@ bool hero_carrying_sprite(const Hero *hero, SpriteActorHandle handle) {
 }
 
 HeroSpriteCarryContext hero_sprite_carry_context(const Hero *hero) {
-    const SpriteOffset stand_offset = {12, -3};
-    const SpriteOffset crouch_offset = {12, -1};
+    const SpriteOffset stand_offset = { -14, -3 };
+    const SpriteOffset crouch_offset = { -14, -1 };
 
     SpriteOffset carry_offset = (hero->ducking ? crouch_offset : stand_offset);
-
-    if (hero->direction == LEFT) {
-        carry_offset.x = -carry_offset.x - 4;
-    }
-
     SpritePosition position = hero->position;
-    position.x += carry_offset.x;
-    position.y += carry_offset.y;
+    sa_apply_offset_flip(&carry_offset, &position, hero->direction);
 
     HeroSpriteCarryContext context = {
         .position = position,
