@@ -32,8 +32,8 @@ static const HeroTileOffset standard_offsets[] = {
 };
 
 static const HeroTileOffset driving_offsets[] = {
-    { .x = 4, .y = -2 },
-    { .x = 4, .y = -18 }
+    { .x = 0, .y = -2 },
+    { .x = 0, .y = -18 }
 };
 
 static const HeroTileOffset carry_offsets[] = {
@@ -58,7 +58,7 @@ static const HeroFrameLayout hero_frames[] = {
     { 0, 1, { 0x06c, 0x08c, -1 }, standard_offsets, { 0, 0 } },
 
     { 2, 0, { 0x062, 0x0e0, 0x2c6 }, kick_frame_offsets, { 0, 0 } },
-    { 6, 0, { 0x004, 0x0e0, -1 }, driving_offsets, { 0, 1 } },
+    { 2, 0, { 0x004, 0x0e0, -1 }, driving_offsets, { 0, 1 } },
 
     { 2, 0, { 0x008, 0x2c4, -1 }, standard_offsets, { 0, 0 } },
 
