@@ -51,19 +51,18 @@ int main() {
 
 static void handle_gl_action(GameLoopAction action, GameContext *context) {
     const PlayerContext *p1 = &context->players[0];
-    const LevelAttributes *level = level_attributes(0);
 
     switch (action) {
         case GL_ACTION_RESET_WORLD:
             gl_reset_context(context, p1->hero, p1->camera, p1->sprite_context);
-            level_init(level, context);
+            level_init(level_attributes(context->level), context);
             music_start(TRACK_LEVEL_1);
             break;
         case GL_ACTION_RELOAD_LEVEL:
-            level_init(level, context);
+            level_init(level_attributes(context->level), context);
             break;
         case GL_ACTION_SHOW_CREDITS:
-            gl_load_credits(level, context);
+            gl_load_credits(context);
             break;
         case GL_ACTION_NONE:
             break;

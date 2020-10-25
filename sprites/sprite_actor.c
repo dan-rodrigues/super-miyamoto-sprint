@@ -4,7 +4,7 @@
 #include "debug_print.h"
 #include "sprite_loading.h"
 
-#define DEFERRED_DRAW_TASK_MAX 4
+#define DEFERRED_DRAW_TASK_MAX 5
 
 static SpriteDeferredDrawTask deferred_draw_tasks[DEFERRED_DRAW_TASK_MAX];
 static uint32_t deferred_draw_index;
