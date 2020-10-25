@@ -2,7 +2,7 @@
 
 This is a simple retro-inspired platformer game (implemented in C11) targetting a [retro-inspired FPGA game](https://github.com/dan-rodrigues/icestation-32) console by the same author (implemented in Verilog). It is a bare metal program using sprites and tilemaps to displays graphics similar to other games of the period and works with modest CPU speed and RAM.
 
-One complete level is playable.
+2 complete levels are playable.
 
 ![Photo](photo/demo.jpg)
 

@@ -3,7 +3,7 @@
 #include "vdp.h"
 #include "assert.h"
 
-#define COMMAND_QUEUE_MAX 24
+#define COMMAND_QUEUE_MAX 20
 
 static uint32_t queue_index = 0;
 static VRAMUploadCommand queue[COMMAND_QUEUE_MAX];

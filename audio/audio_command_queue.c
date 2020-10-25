@@ -3,7 +3,7 @@
 #include "math_util.h"
 #include "assert.h"
 
-#define COMMAND_QUEUE_MAX 8
+#define COMMAND_QUEUE_MAX 6
 
 static AudioCommand queue[COMMAND_QUEUE_MAX];
 static uint8_t queue_index;

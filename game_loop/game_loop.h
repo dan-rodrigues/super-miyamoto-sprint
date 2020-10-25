@@ -59,6 +59,7 @@ struct GameContext {
 
     bool paused;
     bool gameplay_active;
+    uint8_t level;
     ExtraTaskHandle current_fade_handle;
 };
 
@@ -67,7 +68,7 @@ void gl_reset_context(GameContext *context,
                       Camera *camera,
                       SpriteLoadingContext *sprite_context);
 
-void gl_load_credits(const LevelAttributes *base_level, GameContext *context);
+void gl_load_credits(GameContext *context);
 
 GameLoopAction gl_run_frame(GameContext *context);
 bool gl_fading(const GameContext *context);

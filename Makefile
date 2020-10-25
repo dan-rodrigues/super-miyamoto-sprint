@@ -105,10 +105,12 @@ CPU_SLOW_SOURCES += $(addprefix $(ICS32_SW_DIR)common/, \
 
 LEVEL_DIR = assets/levels/
 LEVEL_BIN := $(addprefix $(LEVEL_DIR), \
-	level.bin \
+	level1.bin \
+	level2.bin \
+	sprites1.bin \
+	sprites2.bin \
 	block_map_table.bin \
 	block_attributes.bin \
-	sprites.bin \
 	)
 LEVEL_SOURCES := $(LEVEL_BIN:%.bin=%.c)
 
@@ -268,9 +270,9 @@ palette/palette_init.o: $(addprefix $(GFX_DIR), \
 vram/vram_animated_tiles.o: $(GFX_DIR)animated_tiles.h
 
 level/level_loading.o: $(addprefix $(GFX_DIR), spr00_tiles.h spr01_tiles.h spr02_tiles.h spr06_07_tiles.h fg_bg_tiles.h)
-level/level_loading.o: $(MAPS_DIR)bg_hills_no_clouds.h $(MAPS_DIR)bg_hills_clouds.h
-level/level_attributes.o: $(LEVEL_DIR)level.h $(LEVEL_DIR)sprites.h
-level/block.o: $(LEVEL_DIR)block_map_table.h $(LEVEL_DIR)block_attributes.h
+level/level_loading.o: $(addprefix $(MAPS_DIR), bg_hills_no_clouds.h bg_hills_clouds.h)
+level/level_attributes.o: $(addprefix $(LEVEL_DIR), level1.h level2.h sprites1.h sprites2.h)
+level/block.o: $(addprefix $(LEVEL_DIR), block_map_table.h block_attributes.h)
 game_loop.o: $(LEVEL_DIR)block_map_table.h
 
 ifeq ($(MUSIC), 1)
@@ -322,8 +324,8 @@ $(GFX_DIR)gray_palette.bin: $(REDRAWN_PAL) $(GFX_CONVERT)
 
 # Sprites level data specific, 8bit
 
-$(LEVEL_DIR)sprites.c $(LEVEL_DIR)sprites.h: $(LEVEL_DIR)sprites.bin $(HEADER_GEN)
-	$(HEADER_GEN) -t uint8_t -s -i sprites -o $(@D)/$(*F) $<
+$(LEVEL_DIR)sprites%.c $(LEVEL_DIR)sprites%.h: $(LEVEL_DIR)sprites%.bin $(HEADER_GEN)
+	$(HEADER_GEN) -t uint8_t -s -i $(basename $(@F)) -o $(basename $@) $<
 
 # Other binary includes
 

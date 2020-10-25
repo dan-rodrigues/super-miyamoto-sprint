@@ -111,6 +111,7 @@ void gl_reset_context(GameContext *context,
         },
         .paused = false,
         .gameplay_active = true,
+        .level = 0,
 
         .current_fade_handle = ET_HANDLE_FREE
     };
@@ -118,7 +119,8 @@ void gl_reset_context(GameContext *context,
     *context = context_initialized;
 }
 
-void gl_load_credits(const LevelAttributes *base_level, GameContext *context) {
+void gl_load_credits(GameContext *context) {
+    const LevelAttributes *base_level = level_attributes(0);
     level_load(base_level);
     credits_loop_init(context);
 }

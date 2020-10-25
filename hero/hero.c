@@ -972,5 +972,6 @@ void hero_mark_midpoint_reached(Hero *hero) {
 }
 
 void hero_mark_goal_reached(Hero *hero) {
+    hero->midpoint_reached = false;
     hero->goal_reached = true;
 }

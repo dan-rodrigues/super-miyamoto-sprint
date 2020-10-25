@@ -19,7 +19,7 @@ typedef struct {
     const size_t *sprite_data_length;
 } LevelAttributes;
 
-extern const size_t level_count;
+extern const size_t LEVEL_COUNT;
 const LevelAttributes *level_attributes(uint32_t level);
 
 #endif /* level_attributes_h */
