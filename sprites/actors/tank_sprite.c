@@ -132,7 +132,7 @@ static void prepare_missile_firing(TankSprite *sub) {
 void tank_sprite_hero_drive_update(SpriteActor *self, Hero *hero, SpriteVehicleHeroContext *hero_context) {
     TankSprite *sub = &self->tank;
 
-    HeroVehicleControl control;
+    HeroVehicleControl control = { 0 };
     bool idle = !hero_vehicle_control_state(hero, &control);
 
     const int32_t slow_accel = Q_1 / 16;
@@ -183,7 +183,6 @@ void tank_sprite_hero_drive_update(SpriteActor *self, Hero *hero, SpriteVehicleH
 
         // This does alter the hero position but this is done before caching hero AABB
         hero->position.y += eject_y_displacement;
-        hero->position.x += (hero->direction == LEFT ? 4 : 0);
 
         sa_handle_clear(&hero->vehicle_sprite_handle);
     }
