@@ -56,7 +56,7 @@ void credits_loop_init(GameContext *context) {
     state_transition(context, CREDITS_STATE_INITIAL_DELAY);
 
     context->credits.showing_tech_attributions = false;
-    context->gameplay_active = false;
+    context->game_loop = GL_CREDITS;
 }
 
 void credits_frame_ended_update(CreditsState state) {

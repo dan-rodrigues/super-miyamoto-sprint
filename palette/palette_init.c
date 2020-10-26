@@ -13,6 +13,7 @@
 #include "blue_palette.h"
 #include "gray_palette.h"
 #include "fgbg_palette.h"
+#include "title_main_palette.h"
 
 #include "spr00_palette.h"
 #include "spr01_palette.h"
@@ -20,6 +21,12 @@
 #include "spr04_palette.h"
 
 void palette_init(const LevelAttributes *attributes) {
+    // BG color
+    // This is exempt from alpha fades and is uploaded first separately
+    const uint16_t background_color = 0xf488;
+    pb_preload_bg_color(background_color);
+    pb_upload();
+
     // BG palette
     pb_preload_single_palette(0, bg_palette);
     // Ground palette
@@ -51,13 +58,10 @@ void palette_init(const LevelAttributes *attributes) {
     // 12: Tank
     pb_preload_single_palette(12, spr04_palette);
 
+    // 15: Title
+    pb_preload_single_palette(15, title_main_palette);
+
 #ifdef DEBUG_PRINT
     pb_preload_single_color(TEXT_PALETTE_ID * 0x10 + 1, 0xffff);
 #endif
-
-    // BG color
-
-    const uint16_t background_color = 0xf488;
-    pb_preload_bg_color(background_color);
-    pb_upload();
 }

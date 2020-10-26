@@ -89,6 +89,7 @@ SOURCES += $(addprefix $(ICS32_SW_DIR)common/, \
 	)
 
 CPU_SLOW_SOURCES := \
+	game_loop/title_loop.c \
 	debug/debug_custom_assert.c \
 	palette/palette_init.c \
 	level/level_loading.c \
@@ -137,6 +138,7 @@ PNGS := $(addprefix $(GFX_DIR), \
 	spr04.png \
 	spr06_07.png \
 	fg_bg.png \
+	title_main.png \
 	)
 
 PNG_TILES := $(PNGS:$(GFX_DIR)%.png=$(GFX_DIR)%_tiles.bin)
@@ -267,6 +269,7 @@ palette/palette_init.o: $(addprefix $(GFX_DIR), \
 	miyamoto_palette.h \
 	fgbg_palette.h \
 	bg_palette.h \
+	title_main_palette.h \
 	)
 vram/vram_animated_tiles.o: $(GFX_DIR)animated_tiles.h
 
@@ -274,7 +277,8 @@ level/level_loading.o: $(addprefix $(GFX_DIR), spr00_tiles.h spr01_tiles.h spr02
 level/level_loading.o: $(addprefix $(MAPS_DIR), bg_hills_no_clouds.h bg_hills_clouds.h)
 level/level_attributes.o: $(addprefix $(LEVEL_DIR), level1.h level2.h sprites1.h sprites2.h)
 level/block.o: $(addprefix $(LEVEL_DIR), block_map_table.h block_attributes.h)
-game_loop.o: $(LEVEL_DIR)block_map_table.h
+game_loop/game_loop.o: $(LEVEL_DIR)block_map_table.h
+game_loop/game_loop.o: $(GFX_DIR)title_main_tiles.h
 
 ifeq ($(MUSIC), 1)
 audio/music.o: $(addprefix $(AUDIO_ASSETS_DIR), track1_left.h track1_right.h track2_left.h track2_right.h)
