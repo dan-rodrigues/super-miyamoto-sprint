@@ -41,7 +41,6 @@ int main() {
     gl_reset_context(&context, &hero, &camera, &sprite_loading_context);
 
     handle_gl_action(GL_ACTION_SHOW_TITLE, &context);
-//    handle_gl_action(GL_ACTION_RESET_WORLD, &context);
     
     while (true) {
         GameLoopAction action = gl_run_frame(&context);

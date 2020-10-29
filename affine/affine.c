@@ -25,7 +25,6 @@ static void perspective_matrix(uint32_t line,
                                int16_t sin, int16_t cos,
                                int16_t *a, int16_t *b, int16_t *c, int16_t *d);
 
-// TODO: alc for "c" credits? vs. "t" title
 void al_upload() {
     vdp_set_vram_increment(2);
 
