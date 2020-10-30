@@ -4,6 +4,7 @@
 
 #include "vdp.h"
 #include "gamepad.h"
+#include "math_util.h"
 
 #include "extra_task.h"
 #include "title_main_tiles.h"
@@ -12,6 +13,8 @@
 #include "palette_buffer.h"
 #include "hero.h"
 #include "sprite_text.h"
+
+static const uint8_t TEXT_PALETTE_ID = 9;
 
 static void upload_graphics(void);
 static void state_transition(GameContext *context, TitleState new_state);
@@ -30,6 +33,7 @@ void title_loop_init(GameContext *context) {
         .state = TITLE_STATE_INITIAL_FADE_IN,
         .state_counter = 0,
         .scale = 0,
+        .selected_menu_option = 0,
         .exiting = false
     };
 
@@ -44,6 +48,8 @@ GameLoopAction title_step_frame(GameContext *context) {
 
     uint16_t state_counter = context->title.state_counter++;
 
+    bool should_exit = (pad_edge->start || pad_edge->b);
+
     switch (context->title.state) {
         case TITLE_STATE_INITIAL_FADE_IN: {
             // Initial "zoom out"
@@ -57,22 +63,43 @@ GameLoopAction title_step_frame(GameContext *context) {
             }
         } break;
         case TITLE_STATE_DISPLAYING_TITLE: {
-            bool should_exit = (pad_edge->start || pad_edge->b);
-            title_context->exiting |= should_exit;
-
             const uint16_t prompt_x = 320;
             const uint16_t prompt_y = 320;
-            const uint8_t text_palette_id = 9;
 
             // Alpha blink prompt text
             uint8_t alpha = state_counter & 0xf;
             alpha ^= (state_counter & 0x10 ? 0xf : 0);
-            pb_alpha_mask_palette(text_palette_id, alpha, false);
+            pb_alpha_mask_palette(TEXT_PALETTE_ID, alpha, false);
             st_write("PRESS (START) OR (B)", prompt_x, prompt_y);
 
-            // Staring exit fade while prompt text is visible will be abrupt
-            // Wait until it's not visible to start fading
-            if (!alpha && title_context->exiting) {
+            if (should_exit) {
+                state_transition(context, TITLE_STATE_DISPLAYING_MENU);
+            }
+        } break;
+        case TITLE_STATE_DISPLAYING_MENU: {
+            const uint16_t prompt_x = 320;
+            const uint16_t prompt_y = 320;
+            const uint16_t line_spacing = 20;
+            const int16_t cursor_offset_x = -18;
+
+            // Available options
+            const uint8_t option_count = 3;
+            st_write("LEVEL 1", prompt_x, prompt_y);
+            st_write("LEVEL 2", prompt_x, prompt_y + line_spacing);
+            st_write("CREDITS", prompt_x, prompt_y + line_spacing * 2);
+
+            // Cursor
+            uint16_t cursor_y = prompt_y + title_context->selected_menu_option * line_spacing;
+            st_write("*", prompt_x + cursor_offset_x, cursor_y);
+
+            // User selection
+            int8_t option = title_context->selected_menu_option;
+            option += (pad_edge->down ? 1 : 0);
+            option -= (pad_edge->up ? 1 : 0);
+            option = MAX(MIN(option, option_count - 1), 0);
+            title_context->selected_menu_option = option;
+
+            if (should_exit) {
                 state_transition(context, TITLE_STATE_FADE_OUT);
             }
         } break;
@@ -93,20 +120,27 @@ static FadeTask *start_fade(GameContext *context, FadeTaskType type, uint16_t ma
 static void state_transition(GameContext *context, TitleState new_state) {
     const uint16_t title_palette_mask = 0x8000;
 
+    TitleContext *title_context = &context->title;
+
     switch (new_state) {
         case TITLE_STATE_INITIAL_FADE_IN:
             start_fade(context, FADE_IN, title_palette_mask);
             break;
         case TITLE_STATE_DISPLAYING_TITLE:
             break;
+        case TITLE_STATE_DISPLAYING_MENU:
+            pb_alpha_mask_palette(TEXT_PALETTE_ID, 0xf, false);
+            break;
         case TITLE_STATE_FADE_OUT: {
             FadeTask *task = start_fade(context, FADE_OUT, title_palette_mask);
-            task->final_action = GL_ACTION_RESET_WORLD;
+            bool roll_credits = (title_context->selected_menu_option >= LEVEL_COUNT);
+            task->final_action = (roll_credits ? GL_CREDITS : GL_ACTION_RESET_WORLD);;
         } break;
     }
 
-    context->title.state = new_state;
-    context->title.state_counter = 0;
+    title_context->state = new_state;
+    title_context->state_counter = 0;
+    title_context->exiting = false;
 }
 
 void title_frame_ended_update(GameContext *context) {

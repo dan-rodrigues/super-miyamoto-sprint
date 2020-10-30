@@ -30,6 +30,7 @@ enum CreditsState {
 enum TitleState {
     TITLE_STATE_INITIAL_FADE_IN,
     TITLE_STATE_DISPLAYING_TITLE,
+    TITLE_STATE_DISPLAYING_MENU,
     TITLE_STATE_FADE_OUT
 };
 
@@ -59,6 +60,7 @@ struct TitleContext {
     uint16_t state_counter;
     uint8_t presentation_delay;
     int16_t scale;
+    uint8_t selected_menu_option;
     bool exiting;
 };
 
