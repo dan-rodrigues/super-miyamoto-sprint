@@ -30,7 +30,6 @@ void title_loop_init(GameContext *context) {
 
     static const TitleContext context_initialized = {
         .presentation_delay = 0,
-        .state = TITLE_STATE_INITIAL_FADE_IN,
         .state_counter = 0,
         .scale = 0,
         .selected_menu_option = 0,
@@ -39,7 +38,7 @@ void title_loop_init(GameContext *context) {
 
     context->title = context_initialized;
 
-    state_transition(context, TITLE_STATE_INITIAL_FADE_IN);
+    state_transition(context, TITLE_STATE_INITIAL_DELAY);
 }
 
 GameLoopAction title_step_frame(GameContext *context) {
@@ -51,10 +50,19 @@ GameLoopAction title_step_frame(GameContext *context) {
     bool should_exit = (pad_edge->start || pad_edge->b);
 
     switch (context->title.state) {
+        case TITLE_STATE_INITIAL_DELAY: {
+            pb_alpha_mask_palette(TEXT_PALETTE_ID, 0, false);
+
+            const uint16_t delay = 60;
+
+            if (state_counter >= delay) {
+                state_transition(context, TITLE_STATE_INITIAL_FADE_IN);
+            }
+        } break;
         case TITLE_STATE_INITIAL_FADE_IN: {
             // Initial "zoom out"
             const int16_t target_scale = 0x200;
-            const int16_t scale_delta = 1 * 20;
+            const int16_t scale_delta = 1 * 2;
 
             title_context->scale += scale_delta;
             if (title_context->scale >= target_scale) {
@@ -77,10 +85,12 @@ GameLoopAction title_step_frame(GameContext *context) {
             }
         } break;
         case TITLE_STATE_DISPLAYING_MENU: {
-            const uint16_t prompt_x = 320;
+            const uint16_t prompt_x = 340;
             const uint16_t prompt_y = 320;
             const uint16_t line_spacing = 20;
             const int16_t cursor_offset_x = -18;
+
+            pb_alpha_mask_palette(TEXT_PALETTE_ID, 0xf, false);
 
             // Available options
             const uint8_t option_count = 3;
@@ -123,18 +133,25 @@ static void state_transition(GameContext *context, TitleState new_state) {
     TitleContext *title_context = &context->title;
 
     switch (new_state) {
+        case TITLE_STATE_INITIAL_DELAY:
+            break;
         case TITLE_STATE_INITIAL_FADE_IN:
             start_fade(context, FADE_IN, title_palette_mask);
             break;
         case TITLE_STATE_DISPLAYING_TITLE:
             break;
         case TITLE_STATE_DISPLAYING_MENU:
-            pb_alpha_mask_palette(TEXT_PALETTE_ID, 0xf, false);
             break;
         case TITLE_STATE_FADE_OUT: {
-            FadeTask *task = start_fade(context, FADE_OUT, title_palette_mask);
             bool roll_credits = (title_context->selected_menu_option >= LEVEL_COUNT);
-            task->final_action = (roll_credits ? GL_CREDITS : GL_ACTION_RESET_WORLD);;
+            if (roll_credits) {
+                context->level = 0;
+            } else {
+                context->level = title_context->selected_menu_option;
+            }
+
+            FadeTask *task = start_fade(context, FADE_OUT, 0xffff);
+            task->final_action = (roll_credits ? GL_ACTION_SHOW_CREDITS : GL_ACTION_RESET_WORLD);;
         } break;
     }
 
