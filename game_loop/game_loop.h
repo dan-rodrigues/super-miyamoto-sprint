@@ -93,7 +93,8 @@ struct GameContext {
 void gl_reset_context(GameContext *context,
                       Hero *hero,
                       Camera *camera,
-                      SpriteLoadingContext *sprite_context);
+                      SpriteLoadingContext *sprite_context,
+                      uint8_t level);
 
 void gl_load_title(GameContext *context);
 void gl_load_credits(GameContext *context);

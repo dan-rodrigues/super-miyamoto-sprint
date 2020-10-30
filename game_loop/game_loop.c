@@ -109,7 +109,8 @@ GameLoopAction gl_run_frame(GameContext *context) {
 void gl_reset_context(GameContext *context,
                       Hero *hero,
                       Camera *camera,
-                      SpriteLoadingContext *sprite_context)
+                      SpriteLoadingContext *sprite_context,
+                      uint8_t level)
 {
     const GameContext context_initialized = {
         .players = {
@@ -125,7 +126,7 @@ void gl_reset_context(GameContext *context,
         },
         .game_loop = GL_GAMEPLAY,
         .paused = false,
-        .level = 0,
+        .level = level,
 
         .current_fade_handle = ET_HANDLE_FREE
     };
