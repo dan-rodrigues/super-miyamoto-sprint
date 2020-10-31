@@ -27,8 +27,23 @@ enum CreditsState {
     CREDITS_STATE_FADE_OUT_MUSIC
 };
 
+enum TitleState {
+    TITLE_STATE_INITIAL_DELAY,
+    TITLE_STATE_INITIAL_FADE_IN,
+    TITLE_STATE_DISPLAYING_TITLE,
+    TITLE_STATE_DISPLAYING_MENU,
+    TITLE_STATE_FADE_OUT
+};
+
+enum GameLoop {
+    GL_TITLE,
+    GL_GAMEPLAY,
+    GL_CREDITS
+};
+
 enum GameLoopAction {
     GL_ACTION_NONE = 0,
+    GL_ACTION_SHOW_TITLE,
     GL_ACTION_RESET_WORLD,
     GL_ACTION_RELOAD_LEVEL,
     GL_ACTION_SHOW_CREDITS
@@ -39,6 +54,16 @@ struct CreditsContext {
     CreditsState state;
     uint16_t state_counter;
     bool showing_tech_attributions;
+};
+
+struct TitleContext {
+    TitleState state;
+    uint16_t state_counter;
+    uint8_t presentation_delay;
+    int16_t scale;
+    bool fullscreen_blink_started;
+    uint8_t selected_menu_option;
+    bool exiting;
 };
 
 struct PlayerContext {
@@ -55,19 +80,25 @@ struct GameContext {
     // 1P only for now
     PlayerContext players[1];
 
-    CreditsContext credits;
+    union {
+        CreditsContext credits;
+        TitleContext title;
+    };
 
+    GameLoop game_loop;
     bool paused;
-    bool gameplay_active;
     uint8_t level;
+
     ExtraTaskHandle current_fade_handle;
 };
 
 void gl_reset_context(GameContext *context,
                       Hero *hero,
                       Camera *camera,
-                      SpriteLoadingContext *sprite_context);
+                      SpriteLoadingContext *sprite_context,
+                      uint8_t level);
 
+void gl_load_title(GameContext *context);
 void gl_load_credits(GameContext *context);
 
 GameLoopAction gl_run_frame(GameContext *context);

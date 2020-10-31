@@ -73,6 +73,7 @@ void level_load(const LevelAttributes *attributes) {
     et_reset();
 
     // Foregound is a 512x512 map tiled repeatedly
+    vdp_enable_layers(0);
     vdp_set_wide_map_layers(SCROLL0);
     vdp_set_vram_increment(1);
 

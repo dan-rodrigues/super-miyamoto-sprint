@@ -21,6 +21,7 @@
 #include "debug_custom_assert.h"
 #include "fade_task.h"
 #include "sprite_loading.h"
+#include "title_loop.h"
 
 static void handle_gl_action(GameLoopAction action, GameContext *context);
 
@@ -37,9 +38,10 @@ int main() {
     Camera camera;
     SpriteLoadingContext sprite_loading_context;
 
-    gl_reset_context(&context, &hero, &camera, &sprite_loading_context);
+    const uint8_t initial_level = 0;
+    gl_reset_context(&context, &hero, &camera, &sprite_loading_context, initial_level);
 
-    handle_gl_action(GL_ACTION_RESET_WORLD, &context);
+    handle_gl_action(GL_ACTION_SHOW_TITLE, &context);
     
     while (true) {
         GameLoopAction action = gl_run_frame(&context);
@@ -54,9 +56,12 @@ static void handle_gl_action(GameLoopAction action, GameContext *context) {
 
     switch (action) {
         case GL_ACTION_RESET_WORLD:
-            gl_reset_context(context, p1->hero, p1->camera, p1->sprite_context);
+            gl_reset_context(context, p1->hero, p1->camera, p1->sprite_context, context->level);
             level_init(level_attributes(context->level), context);
             music_start(TRACK_LEVEL_1);
+            break;
+        case GL_ACTION_SHOW_TITLE:
+            gl_load_title(context);
             break;
         case GL_ACTION_RELOAD_LEVEL:
             level_init(level_attributes(context->level), context);

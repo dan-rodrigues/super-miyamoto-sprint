@@ -20,10 +20,12 @@ static bool use_modified_palette = false;
 // It's assumed a (dummy) color 0 is included in data
 void pb_preload_single_palette(uint8_t palette_id, const uint16_t *data) {
     memcpy(&palette_preloaded[palette_id * 16 + 1], data + 1, (PALETTE_SIZE - 1) * 2);
+    palette_needs_upload[palette_id] = true;
 }
 
 void pb_preload_single_color(uint8_t color_id, uint16_t color) {
     palette_preloaded[color_id] = color;
+    palette_needs_upload[color_id / 16] |= (color_id != 0);
 }
 
 void pb_preload_bg_color(uint16_t color) {
@@ -64,7 +66,11 @@ void pb_alpha_mask_palette(uint8_t palette_id, uint8_t alpha, bool including_bg_
     }
 
     palette_needs_upload[palette_id] = true;
-    bg_color_needs_upload |= ((palette_id == 0) && including_bg_color);
+
+    if (including_bg_color && palette_id == 0) {
+        bg_color_needs_upload = true;
+    }
+
     use_modified_palette = true;
 }
 
@@ -74,7 +80,7 @@ void pb_alpha_mask_all(uint8_t alpha, bool including_bg_color) {
 
 static uint8_t lerp_channel(uint8_t from, uint8_t to, uint8_t step) {
     uint8_t delta = to - from;
-    uint8_t scaled_distance = (sys_multiply(delta, step) + 8) / 0x10;
+    uint8_t scaled_distance = (sys_multiply(delta, step) + 8) / 16;
     return from + scaled_distance;
 }
 
@@ -84,7 +90,7 @@ void pb_lerp_palette_to_white(uint8_t palette_id, uint16_t mask, uint8_t step) {
             continue;
         }
 
-        pb_lerp_to_white(palette_id * 0x10 + i, step);
+        pb_lerp_to_white(palette_id * 16 + i, step);
     }
 }
 
@@ -105,7 +111,7 @@ void pb_lerp_to_white(uint8_t color_id, uint8_t step) {
 
     palette_modified[color_id] = color;
     use_modified_palette = true;
-    pb_queue_palette(color_id / 0x10);
+    pb_queue_palette(color_id / 16);
 }
 
 void pb_reset() {
