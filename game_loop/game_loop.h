@@ -61,6 +61,7 @@ struct TitleContext {
     uint16_t state_counter;
     uint8_t presentation_delay;
     int16_t scale;
+    bool fullscreen_blink_started;
     uint8_t selected_menu_option;
     bool exiting;
 };

@@ -19,6 +19,7 @@ static const uint8_t TEXT_PALETTE_ID = 9;
 static void upload_graphics(void);
 static void state_transition(GameContext *context, TitleState new_state);
 static FadeTask *start_fade(GameContext *context, FadeTaskType type, uint16_t mask);
+static int16_t title_scale(uint16_t state_counter, bool *fullscreen_reached, bool *end_reached);
 
 void title_loop_init(GameContext *context) {
     const LevelAttributes *base_level = level_attributes(0);
@@ -32,6 +33,7 @@ void title_loop_init(GameContext *context) {
         .presentation_delay = 0,
         .state_counter = 0,
         .scale = 0,
+        .fullscreen_blink_started = false,
         .selected_menu_option = 0,
         .exiting = false
     };
@@ -53,20 +55,27 @@ GameLoopAction title_step_frame(GameContext *context) {
         case TITLE_STATE_INITIAL_DELAY: {
             pb_alpha_mask_palette(TEXT_PALETTE_ID, 0, false);
 
-            const uint16_t delay = 60;
+            const uint16_t delay = 60 * 1;
 
             if (state_counter >= delay) {
                 state_transition(context, TITLE_STATE_INITIAL_FADE_IN);
             }
         } break;
         case TITLE_STATE_INITIAL_FADE_IN: {
-            // Initial "zoom out"
-            const int16_t target_scale = 0x200;
-            const int16_t scale_delta = 1 * 2;
+            bool should_exit = false;
+            bool fullscreen_reached = false;
+            title_context->scale = title_scale(state_counter, &fullscreen_reached, &should_exit);
 
-            title_context->scale += scale_delta;
-            if (title_context->scale >= target_scale) {
-                title_context->scale = target_scale;
+            bool should_blink = (fullscreen_reached && !title_context->fullscreen_blink_started);
+            if (should_blink) {
+                // Blink all colors except the black outline
+                ExtraTask *task = palette_lerp_task_init(15, ~0x0002);
+                task->palette_lerp.type = PALETTE_LERP_FROM;
+            }
+
+            title_context->fullscreen_blink_started |= fullscreen_reached;
+
+            if (should_exit) {
                 state_transition(context, TITLE_STATE_DISPLAYING_TITLE);
             }
         } break;
@@ -85,7 +94,7 @@ GameLoopAction title_step_frame(GameContext *context) {
             }
         } break;
         case TITLE_STATE_DISPLAYING_MENU: {
-            const uint16_t prompt_x = 340;
+            const uint16_t prompt_x = 350;
             const uint16_t prompt_y = 320;
             const uint16_t line_spacing = 20;
             const int16_t cursor_offset_x = -18;
@@ -158,6 +167,25 @@ static void state_transition(GameContext *context, TitleState new_state) {
     title_context->state = new_state;
     title_context->state_counter = 0;
     title_context->exiting = false;
+}
+
+static int16_t title_scale(uint16_t state_counter, bool *fullscreen_reached, bool *end_reached) {
+    int16_t angle = sys_multiply(state_counter, 5);
+
+    const int16_t initial_bounce_complete_angle = (SIN_PERIOD / 2 - 52);
+    const int16_t fullscreen_delay_complete_angle = initial_bounce_complete_angle + 160;
+    const int16_t scaling_complete_angle = fullscreen_delay_complete_angle + 35;
+
+    // Crude piecewise function but fine for a simple bounce effect on titlescreen
+    if (angle >= fullscreen_delay_complete_angle) {
+        *end_reached = (angle >= scaling_complete_angle);
+        angle = initial_bounce_complete_angle - (angle - fullscreen_delay_complete_angle);
+    } else if (angle >= initial_bounce_complete_angle) {
+        *fullscreen_reached = true;
+        angle = initial_bounce_complete_angle;
+    }
+
+    return sin(angle) / 16;
 }
 
 void title_frame_ended_update(GameContext *context) {
