@@ -34,4 +34,6 @@ void sa_draw_standard_light(const SpriteActorLight *self, const SpriteEnvironmen
 void sa_draw_standard_multiple(const SpriteActor *self, const SpriteEnvironment *env, const SpriteDrawParams *params, size_t count);
 void sa_draw_standard_light_multiple(const SpriteActorLight *self, const SpriteEnvironment *env, const SpriteDrawParams *params, size_t count);
 
+bool sa_draw_needed(int32_t screen_x, int32_t screen_y, int32_t padding);
+
 #endif /* sprite_drawing_h */

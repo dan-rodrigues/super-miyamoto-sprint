@@ -8,8 +8,6 @@
 #include "vdp.h"
 #include "sprite_buffer.h"
 
-static bool onscreen(int32_t screen_x, int32_t screen_y, int32_t padding);
-
 static void sa_draw_standard_8x8_impl(const SpritePosition *position,
                                       SpriteDirection direction,
                                       const SpriteEnvironment *env,
@@ -153,7 +151,7 @@ static void sa_draw_standard_impl(const SpritePosition *position,
     uint32_t y = position->y - env->camera->scroll.y + params->offset_y;
 
     int32_t screen_padding = 32;
-    if (!onscreen(x, y, screen_padding)) {
+    if (!sa_draw_needed(x, y, screen_padding)) {
         return;
     }
 
@@ -178,7 +176,7 @@ static void sa_draw_standard_impl(const SpritePosition *position,
     }
 }
 
-static bool onscreen(int32_t screen_x, int32_t screen_y, int32_t padding) {
+bool sa_draw_needed(int32_t screen_x, int32_t screen_y, int32_t padding) {
     return
         (screen_x + padding >= 0) &&
         (screen_x - padding < SCREEN_ACTIVE_WIDTH) &&
