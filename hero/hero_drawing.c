@@ -12,6 +12,7 @@
 #include "vram_layout.h"
 #include "palette_buffer.h"
 #include "hero_frames.h"
+#include "sprite_drawing.h"
 
 void hero_draw(Hero *hero, int16_t sprite_tile, const Camera *camera) {
     bool should_update_palette = (
@@ -72,11 +73,16 @@ void hero_draw(Hero *hero, int16_t sprite_tile, const Camera *camera) {
 
         // Sprite metadata
 
-        uint32_t x_block = tile_x;
+        int32_t x_block = tile_x;
+        int32_t y_block = tile_y + layout.offset.y;
+
+        if (!sa_draw_needed(tile_x, tile_y, 32)) {
+            continue;
+        }
+
         x_block &= 0x3ff;
         x_block |= (x_flip ? SPRITE_X_FLIP : 0);
 
-        uint32_t y_block = tile_y + layout.offset.y;
         y_block &= 0x1ff;
         y_block |= SPRITE_16_TALL | SPRITE_16_WIDE;
 
