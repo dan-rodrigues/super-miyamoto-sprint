@@ -35,7 +35,7 @@ void dbg_spawn_platform(const Hero *hero) {
 
 void dbg_print_sandbox_instructions() {
     static const char * const line_1 = "Start: Pause";
-    static const char * const line_2 = "Select: Reset game world";
+    static const char * const line_2 = "Select: Return to menu";
 
     const int16_t base_x = 320;
     const int16_t base_y = 10;
@@ -50,7 +50,7 @@ void dbg_frame_action(GameContext *context) {
     // Select: reset game world (fade out and reload)
     if (!gl_fading(context) && p1_pad_edge->select && !context->paused) {
         ExtraTask *reload_task = level_reload_sequence_task_init(0, true);
-        reload_task->level_reload_sequence.final_action = GL_ACTION_RESET_WORLD;
+        reload_task->level_reload_sequence.final_action = GL_ACTION_SHOW_TITLE;
         context->current_fade_handle = reload_task->handle;
     }
 }

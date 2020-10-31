@@ -102,8 +102,10 @@ static void end_state_check(GameContext *context) {
     // Level complete?
     if (hero->goal_reached) {
         context->level++;
-
         bool roll_credits = (context->level == LEVEL_COUNT);
+        if (roll_credits) {
+            context->level = 0;
+        }
 
         const uint8_t fade_delay = 30;
         ExtraTask *task = level_reload_sequence_task_init(fade_delay, false);

@@ -94,7 +94,7 @@ GameLoopAction title_step_frame(GameContext *context) {
             }
         } break;
         case TITLE_STATE_DISPLAYING_MENU: {
-            const uint16_t prompt_x = 350;
+            const uint16_t prompt_x = 370;
             const uint16_t prompt_y = 320;
             const uint16_t line_spacing = 20;
             const int16_t cursor_offset_x = -18;
