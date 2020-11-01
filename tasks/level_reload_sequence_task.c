@@ -18,9 +18,8 @@ GameLoopAction level_reload_sequence_task_main(ExtraTask *self) {
                 sub->current_subtask_handle = task->handle;
 
                 // 2. Fade out music, then play credits
-                if (sub->play_credits_music) {
+                if (sub->fade_music) {
                     ExtraTask *music_task = music_fade_task_init();
-                    music_task->music_fade.next_track = TRACK_CREDITS;
                     sub->current_audio_subtask_handle = music_task->handle;
                 }
 
@@ -69,7 +68,7 @@ ExtraTask *level_reload_sequence_task_init(uint16_t delay, bool skip_hero_fade) 
 
     sub->state = LEVEL_RELOAD_SEQUENCE_DELAY;
     sub->final_action = GL_ACTION_RELOAD_LEVEL;
-    sub->play_credits_music = false;
+    sub->fade_music = false;
     sub->current_subtask_handle = ET_HANDLE_FREE;
     sub->current_audio_subtask_handle = ET_HANDLE_FREE;
     return task;
