@@ -13,6 +13,7 @@
 #include "palette_buffer.h"
 #include "hero.h"
 #include "sprite_text.h"
+#include "sound_effects.h"
 
 static const uint8_t TEXT_PALETTE_ID = 9;
 
@@ -90,6 +91,7 @@ GameLoopAction title_step_frame(GameContext *context) {
             st_write("PRESS (START) OR (B)", prompt_x, prompt_y);
 
             if (should_exit) {
+                se_powerup();
                 state_transition(context, TITLE_STATE_DISPLAYING_MENU);
             }
         } break;
@@ -119,6 +121,7 @@ GameLoopAction title_step_frame(GameContext *context) {
             title_context->selected_menu_option = option;
 
             if (should_exit) {
+                se_powerup();
                 state_transition(context, TITLE_STATE_FADE_OUT);
             }
         } break;
