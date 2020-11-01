@@ -6,6 +6,12 @@ This is a simple retro-inspired platformer game (implemented in C11) targetting 
 
 ![Photo](photo/demo.jpg)
 
+## Video
+
+This video was captured from a ULX3S using a HDMI capture stick, an SPDIF DAC for audio and a Bluetooth gamepad for controls. Click the thumbnail to watch the video on Youtube.
+
+[![Gameplay video](http://img.youtube.com/vi/OpS6Ng2Ago0/0.jpg)](https://youtu.be/OpS6Ng2Ago0 "Gameplay video")
+
 ## Binaries
 
 FPGA bitstreams and game binaries for the program can be downloaded from the [Releases](https://github.com/dan-rodrigues/super-miyamoto-sprint/releases) page. The game should start after flashing the bitstream.
