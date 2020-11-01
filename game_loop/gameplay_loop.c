@@ -111,7 +111,7 @@ static void end_state_check(GameContext *context) {
         ExtraTask *task = level_reload_sequence_task_init(fade_delay, false);
         LevelReloadSequenceTask *reload_task = &task->level_reload_sequence;
         reload_task->final_action = (roll_credits ? GL_ACTION_SHOW_CREDITS : GL_ACTION_RELOAD_LEVEL);
-        reload_task->play_credits_music = roll_credits;
+        reload_task->fade_music = roll_credits;
         context->current_fade_handle = task->handle;
     }
 }

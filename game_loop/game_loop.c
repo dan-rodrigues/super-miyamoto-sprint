@@ -138,6 +138,7 @@ void gl_load_credits(GameContext *context) {
     const LevelAttributes *base_level = level_attributes(0);
     level_load(base_level);
     credits_loop_init(context);
+    music_start(TRACK_CREDITS);
 }
 
 void gl_load_title(GameContext *context) {

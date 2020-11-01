@@ -47,10 +47,11 @@ void dbg_print_sandbox_instructions() {
 void dbg_frame_action(GameContext *context) {
     const PadInputDecoded *p1_pad_edge = &context->players[0].hero->pad_edge;
 
-    // Select: reset game world (fade out and reload)
+    // Select: return to menu
     if (!gl_fading(context) && p1_pad_edge->select && !context->paused) {
         ExtraTask *reload_task = level_reload_sequence_task_init(0, true);
         reload_task->level_reload_sequence.final_action = GL_ACTION_SHOW_TITLE;
+        reload_task->level_reload_sequence.fade_music = true;
         context->current_fade_handle = reload_task->handle;
     }
 }

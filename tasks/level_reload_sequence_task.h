@@ -17,7 +17,7 @@ typedef struct {
     ExtraTaskHandle current_audio_subtask_handle;
     uint8_t delay_counter;
     uint16_t fade_palette_mask;
-    bool play_credits_music;
+    bool fade_music;
     bool skip_hero_fade;
     GameLoopAction final_action;
 } LevelReloadSequenceTask;
