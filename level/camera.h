@@ -44,6 +44,6 @@ void camera_update(Camera *camera, const Hero *hero);
 void camera_apply_scroll(const Camera *camera);
 void camera_apply_vram_update(Camera *camera, uint16_t map_base, const uint16_t *block_map);
 
-bool camera_point_visible(uint32_t x, uint32_t y, const Camera *camera);
+bool camera_point_visible(int32_t x, int32_t y, const Camera *camera);
 
 #endif /* camera_h */

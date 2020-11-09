@@ -18,7 +18,7 @@ static bool can_see_hero(const SpriteActor *self, const Hero *hero);
 static void position_driver(SpriteActor *self, TankSprite *sub);
 static void missile_launch_update(SpriteActor *self, TankSprite *sub);
 static void prepare_missile_firing(TankSprite *sub);
-static bool enemy_is_driving(SpriteActor *self, TankSprite *sub);
+static bool enemy_is_driving(TankSprite *sub);
 static void exhaust_decoration(const SpriteActor *self, TankSprite *sub, const Hero *hero);
 
 void tank_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
@@ -26,7 +26,7 @@ void tank_sprite_main(SpriteActor *self, const SpriteEnvironment *env) {
     Hero *hero = env->hero;
 
     bool hero_driving = hero_in_vehicle(hero, self);
-    bool enemy_driving = enemy_is_driving(self, sub);
+    bool enemy_driving = enemy_is_driving(sub);
 
     if (self->killed) {
         move(self);
@@ -113,7 +113,7 @@ static void exhaust_decoration(const SpriteActor *self, TankSprite *sub, const H
     sub->exahust_sprite_acc = smoke_acc;
 }
 
-static bool enemy_is_driving(SpriteActor *self, TankSprite *sub) {
+static bool enemy_is_driving(TankSprite *sub) {
     if (!sa_handle_live(sub->driver_enemy_handle)) {
         return false;
     }
@@ -279,7 +279,7 @@ static void missile_launch_update(SpriteActor *self, TankSprite *sub) {
     missile->direction = self->direction;
     missile->velocity.x = sa_velocity_from_speed(launch_x_speed, missile->direction);
     missile->velocity.y = 0;
-    missile->hurts_hero = enemy_is_driving(self, sub);
+    missile->hurts_hero = enemy_is_driving(sub);
 }
 
 static void move(SpriteActor *self) {
