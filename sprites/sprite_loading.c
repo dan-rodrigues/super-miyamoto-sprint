@@ -37,7 +37,7 @@ static void update_left_scroll(SpriteLoadingContext *context, int32_t new_scroll
 
     bool moved_left = new_scroll < context->previous_left_scroll;
     if (moved_left) {
-        while (next_left_index >= 0) {
+        while (*next_left_index >= 0) {
             SpriteLevelEncoded next_left_sprite = context->sprite_data_base[*next_left_index];
             if (next_left_sprite.x <= new_scroll) {
                 break;

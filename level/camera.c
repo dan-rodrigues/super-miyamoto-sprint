@@ -120,7 +120,7 @@ void camera_fullscreen_vram_update(uint16_t map_base, const uint16_t *block_map,
 
 // Checks if point is visible for the given camera
 
-bool camera_point_visible(uint32_t x, uint32_t y, const Camera *camera) {
+bool camera_point_visible(int32_t x, int32_t y, const Camera *camera) {
     // No reason to pass y!=0 for now
     assert(!y);
 
